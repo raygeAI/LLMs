@@ -1,0 +1,85 @@
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    exclude:
+      - .github/*
+      - docs/**
+      - README.md
+      - notebooks/*
+
+pool:
+  name: gpu-t4-pool
+
+variables:
+  imageName: 'nebulydocker/nebullvm'
+
+steps:
+
+  - script: |
+      nvidia-smi
+    displayName: 'Ensure cuda is installed correctly'
+
+  - script: |
+      pip uninstall -y nebullvm
+      pip install .
+    displayName: 'Install nebullvm'
+
+  - script: |
+      cd apps/accelerate/speedster
+      pip uninstall -y speedster
+      pip install .
+      cd ../../..
+    displayName: 'Install speedster'
+
+  - script: python -m pip install torch torchvision --extra-index-url https://download.pytorch.org/whl/cu117
+    displayName: 'Install PyTorch'
+
+  - script: |
+      export PATH=$PATH:/home/AzDevOps/.local/bin
+      python -m nebullvm.installers.auto_installer --compilers all
+    displayName: 'Install deep learning compilers'
+
+  - script: |
+      python -m pip install -r "requirements-dev.txt"
+      pip install pytest-azurepipelines
+    displayName: 'Install requirements for testing'
+
+  - script: |
+      res=$(python -c "from nebullvm.tools.utils import check_device; print(check_device().type.name == 'GPU')")
+      if [ "$res" = "False" ]; then
+          echo "GPU is not available"
+          exit 1
+      fi
+      echo "GPU is available: $res"
+      res=$(python -c "import torch; print(torch.cuda.is_available())")
+      if [ "$res" = "False" ]; then
+          echo "CUDA is not available for PyTorch"
+          exit 1
+      fi
+      echo "CUDA is available for PyTorch: $res"
+      res=$(python -c "import torch; num_devices = torch.cuda.device_count(); print(num_devices is not None and isinstance(num_devices, int) and num_devices > 0)")
+      if [ "$res" = "False" ]; then
+          echo "No CUDA devices found"
+          exit 1
+      fi
+      echo "CUDA devices found: $res"
+    displayName: 'Check GPU is available'
+
+  - script: |
+      export SPEEDSTER_DISABLE_TELEMETRY=1
+      export PATH=$PATH:/home/AzDevOps/.local/bin
+      cd apps/accelerate/speedster
+      pytest
+      cd ../../..
+    displayName: 'Run api tests'
+    failOnStderr: true
+
+  - script: |
+      export PATH=$PATH:/home/AzDevOps/.local/bin
+      cd nebullvm
+      pytest
+      cd ../
+    displayName: 'Run components tests'
+    failOnStderr: true
