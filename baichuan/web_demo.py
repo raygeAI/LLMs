@@ -1,96 +1,72 @@
+import json
+import torch
+import streamlit as st
 from transformers import AutoModelForCausalLM, AutoTokenizer
-import gradio as gr
-import mdtex2html
-
-tokenizer = AutoTokenizer.from_pretrained("baichuan-inc/baichuan-7B", trust_remote_code=True)
-model = AutoModelForCausalLM.from_pretrained("baichuan-inc/baichuan-7B", device_map="auto", trust_remote_code=True).half().cuda()
-model = model.eval()
+from transformers.generation.utils import GenerationConfig
 
 
-def postprocess(self, y):
-    if y is None:
-        return []
-    for i, (message, response) in enumerate(y):
-        y[i] = (
-            None if message is None else mdtex2html.convert((message)),
-            None if response is None else mdtex2html.convert(response),
-        )
-    return y
+st.set_page_config(page_title="Baichuan 2")
+st.title("Baichuan 2")
+
+model_file = "D:/work/LLMs/model/baichuan-inc/baichuan2-7b-chat"
+@st.cache_resource
+def init_model():
+    model = AutoModelForCausalLM.from_pretrained(
+        model_file,
+        torch_dtype=torch.float16,
+        device_map="auto",
+        trust_remote_code=True
+    )
+    model.generation_config = GenerationConfig.from_pretrained(
+        model_file
+    )
+    tokenizer = AutoTokenizer.from_pretrained(
+        model_file,
+        use_fast=False,
+        trust_remote_code=True
+    )
+    return model, tokenizer
 
 
-gr.Chatbot.postprocess = postprocess
+def clear_chat_history():
+    del st.session_state.messages
 
 
-def parse_text(text):
-    lines = text.split("\n")
-    lines = [line for line in lines if line != ""]
-    count = 0
-    for i, line in enumerate(lines):
-        if "```" in line:
-            count += 1
-            items = line.split('`')
-            if count % 2 == 1:
-                lines[i] = f'<pre><code class="language-{items[-1]}">'
-            else:
-                lines[i] = f'<br></code></pre>'
-        else:
-            if i > 0:
-                if count % 2 == 1:
-                    line = line.replace("`", "\`")
-                    line = line.replace("<", "&lt;")
-                    line = line.replace(">", "&gt;")
-                    line = line.replace(" ", "&nbsp;")
-                    line = line.replace("*", "&ast;")
-                    line = line.replace("_", "&lowbar;")
-                    line = line.replace("-", "&#45;")
-                    line = line.replace(".", "&#46;")
-                    line = line.replace("!", "&#33;")
-                    line = line.replace("(", "&#40;")
-                    line = line.replace(")", "&#41;")
-                    line = line.replace("$", "&#36;")
-                lines[i] = "<br>"+line
-    text = "".join(lines)
-    return text
+def init_chat_history():
+    with st.chat_message("assistant", avatar='🤖'):
+        st.markdown("您好，我是百川大模型，很高兴为您服务🥰")
+
+    if "messages" in st.session_state:
+        for message in st.session_state.messages:
+            avatar = '🧑‍💻' if message["role"] == "user" else '🤖'
+            with st.chat_message(message["role"], avatar=avatar):
+                st.markdown(message["content"])
+    else:
+        st.session_state.messages = []
+
+    return st.session_state.messages
 
 
-def predict(input, chatbot, max_length, top_p, temperature, history):
-    chatbot.append((parse_text(input), ""))
-    for response, history in model.stream_chat(tokenizer, input, history, max_length=max_length, top_p=top_p, temperature=temperature):
-        chatbot[-1] = (parse_text(input), parse_text(response))
-        yield chatbot, history
+def main():
+    model, tokenizer = init_model()
+    messages = init_chat_history()
+
+    if prompt := st.chat_input("Shift + Enter 换行, Enter 发送"):
+        with st.chat_message("user", avatar='🧑‍💻'):
+            st.markdown(prompt)
+        messages.append({"role": "user", "content": prompt})
+        print(f"[user] {prompt}", flush=True)
+        with st.chat_message("assistant", avatar='🤖'):
+            placeholder = st.empty()
+            for response in model.chat(tokenizer, messages, stream=True):
+                placeholder.markdown(response)
+                if torch.backends.mps.is_available():
+                    torch.mps.empty_cache()
+        messages.append({"role": "assistant", "content": response})
+        print(json.dumps(messages, ensure_ascii=False), flush=True)
+
+        st.button("清空对话", on_click=clear_chat_history)
 
 
-def reset_user_input():
-    return gr.update(value='')
-
-
-def reset_state():
-    return [], []
-
-
-with gr.Blocks() as demo:
-    gr.HTML("""<h1 align="center">baichuan</h1>""")
-
-    chatbot = gr.Chatbot()
-    with gr.Row():
-        with gr.Column(scale=4):
-            with gr.Column(scale=12):
-                user_input = gr.Textbox(show_label=False, placeholder="Input...", lines=10).style(
-                    container=False)
-            with gr.Column(min_width=32, scale=1):
-                submitBtn = gr.Button("Submit", variant="primary")
-        with gr.Column(scale=1):
-            emptyBtn = gr.Button("Clear History")
-            max_length = gr.Slider(0, 4096, value=2048, step=1.0, label="Maximum length", interactive=True)
-            top_p = gr.Slider(0, 1, value=0.7, step=0.01, label="Top P", interactive=True)
-            temperature = gr.Slider(0, 1, value=0.95, step=0.01, label="Temperature", interactive=True)
-
-    history = gr.State([])
-
-    submitBtn.click(predict, [user_input, chatbot, max_length, top_p, temperature, history], [chatbot, history],
-                    show_progress=True)
-    submitBtn.click(reset_user_input, [], [user_input])
-
-    emptyBtn.click(reset_state, outputs=[chatbot, history], show_progress=True)
-
-demo.queue().launch(share=False, inbrowser=True)
+if __name__ == "__main__":
+    main()
