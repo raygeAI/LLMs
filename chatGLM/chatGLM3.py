@@ -7,7 +7,7 @@ tokenizer = AutoTokenizer.from_pretrained(model_file,  trust_remote_code=True)
 model = AutoModel.from_pretrained(model_file, trust_remote_code=True).half().cuda()
 model.eval()
 
-input = "尝试比较一下1和2的大小"
+input = "介绍一下你自己"
 
 response, history = model.chat(tokenizer, input, history=[])
 print(response)

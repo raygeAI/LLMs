@@ -33,10 +33,17 @@ local_doc_qa = LocalDocQA()
 flag_csv_logger = gr.CSVLogger()
 
 
-def get_answer(query, vs_path, history, mode,
-               score_threshold=VECTOR_SEARCH_SCORE_THRESHOLD,
-               vector_search_top_k=VECTOR_SEARCH_TOP_K, chunk_conent: bool = True,
-               chunk_size=CHUNK_SIZE, streaming: bool = STREAMING):
+def get_answer(
+        query,
+        vs_path,
+        history,
+        mode,
+        score_threshold=VECTOR_SEARCH_SCORE_THRESHOLD,
+        vector_search_top_k=VECTOR_SEARCH_TOP_K,
+        chunk_conent: bool = True,
+        chunk_size=CHUNK_SIZE,
+        streaming: bool = STREAMING):
+    print("mode", mode)
     if mode == "Bing搜索问答":
         for resp, history in local_doc_qa.get_search_result_based_answer(
                 query=query, chat_history=history, streaming=streaming):
@@ -46,31 +53,33 @@ def get_answer(query, vs_path, history, mode,
                     f"""<details> <summary>出处 [{i + 1}] <a href="{doc.metadata["source"]}" target="_blank">{doc.metadata["source"]}</a> </summary>\n"""
                     f"""{doc.page_content}\n"""
                     f"""</details>"""
-                    for i, doc in
-                    enumerate(resp["source_documents"])])
+                    for i, doc in enumerate(resp["source_documents"])])
             history[-1][-1] += source
             yield history, ""
-    elif mode == "知识库问答" and vs_path is not None and os.path.exists(vs_path) and "index.faiss" in os.listdir(vs_path):
-        for resp, history in local_doc_qa.get_knowledge_based_answer(
-                query=query, vs_path=vs_path, chat_history=history, streaming=streaming):
+    elif mode == "知识库问答" and vs_path is not None and os.path.exists(vs_path) and "index.faiss" in os.listdir(
+            vs_path):
+        for resp, history in local_doc_qa.get_knowledge_based_answer(query=query, vs_path=vs_path, chat_history=history,
+                                                                     streaming=streaming):
+            print("........................", resp, history)
             source = "\n\n"
             source += "".join(
                 [f"""<details> <summary>出处 [{i + 1}] {os.path.split(doc.metadata["source"])[-1]}</summary>\n"""
                  f"""{doc.page_content}\n"""
                  f"""</details>"""
-                 for i, doc in
-                 enumerate(resp["source_documents"])])
+                 for i, doc in enumerate(resp["source_documents"])])
+            print("source", source)
             history[-1][-1] += source
+            print("....x....", history)
             yield history, ""
     elif mode == "知识库测试":
         if os.path.exists(vs_path):
             resp, prompt = local_doc_qa.get_knowledge_based_content_test(
-                                                                         query=query,
-                                                                         vs_path=vs_path,
-                                                                         score_threshold=score_threshold,
-                                                                         vector_search_top_k=vector_search_top_k,
-                                                                         chunk_conent=chunk_conent,
-                                                                         chunk_size=chunk_size)
+                query=query,
+                vs_path=vs_path,
+                score_threshold=score_threshold,
+                vector_search_top_k=vector_search_top_k,
+                chunk_conent=chunk_conent,
+                chunk_size=chunk_size)
             if not resp["source_documents"]:
                 yield history + [[query,
                                   "根据您的设定，没有匹配到任何内容，请确认您设置的知识相关度 Score 阈值是否过小或其他参数是否正确。"]], ""
@@ -85,8 +94,7 @@ def get_answer(query, vs_path, history, mode,
                 history.append([query, "以下内容为知识库中满足设置条件的匹配结果：\n\n" + source])
                 yield history, ""
         else:
-            yield history + [[query,
-                              "请选择知识库后进行测试，当前未选择知识库。"]], ""
+            yield history + [[query, "请选择知识库后进行测试，当前未选择知识库。"]], ""
     else:
         for answer_result in local_doc_qa.llm.generatorAnswer(prompt=query, history=history, streaming=streaming):
             resp = answer_result.llm_output["answer"]
@@ -174,7 +182,7 @@ def change_vs_name_input(vs_id, history):
         else:
             file_status = f"已选择知识库{vs_id}，当前知识库中未上传文件，请先上传文件后，再开始提问"
         return gr.update(visible=False), gr.update(visible=False), gr.update(visible=True), \
-               vs_path, history + [[None, file_status]]
+            vs_path, history + [[None, file_status]]
 
 
 knowledge_base_test_mode_info = ("【注意】\n\n"
@@ -357,6 +365,7 @@ with gr.Blocks(css=block_css, theme=gr.themes.Default(**default_theme_args)) as 
                     query.submit(get_answer,
                                  [query, vs_path, chatbot, mode],
                                  [chatbot, query])
+
     with gr.Tab("知识库测试 Beta"):
         with gr.Row():
             with gr.Column(scale=10):
@@ -389,14 +398,15 @@ with gr.Blocks(css=block_css, theme=gr.themes.Default(**default_theme_args)) as 
                                             label="匹配单段内容的连接上下文后最大长度",
                                             interactive=True, visible=False)
                     chunk_conent.change(fn=change_chunk_content,
-                                        inputs=[chunk_conent, gr.Textbox(value="chunk_content", visible=False), chatbot],
+                                        inputs=[chunk_conent, gr.Textbox(value="chunk_content", visible=False),
+                                                chatbot],
                                         outputs=[chunk_sizes, chatbot])
                 with vs_setting:
                     vs_refresh = gr.Button("更新已有知识库选项")
                     select_vs_test = gr.Dropdown(get_vs_list(),
-                                            label="请选择要加载的知识库",
-                                            interactive=True,
-                                            value=get_vs_list()[0] if len(get_vs_list()) > 0 else None)
+                                                 label="请选择要加载的知识库",
+                                                 interactive=True,
+                                                 value=get_vs_list()[0] if len(get_vs_list()) > 0 else None)
                     vs_name = gr.Textbox(label="请输入新建知识库名称，当前知识库命名暂不支持中文",
                                          lines=1,
                                          interactive=True,
@@ -436,8 +446,8 @@ with gr.Blocks(css=block_css, theme=gr.themes.Default(**default_theme_args)) as 
                                  inputs=[vs_name, chatbot],
                                  outputs=[select_vs_test, vs_name, vs_add, file2vs, chatbot])
                     select_vs_test.change(fn=change_vs_name_input,
-                                     inputs=[select_vs_test, chatbot],
-                                     outputs=[vs_name, vs_add, file2vs, vs_path, chatbot])
+                                          inputs=[select_vs_test, chatbot],
+                                          outputs=[vs_name, vs_add, file2vs, vs_path, chatbot])
                     load_file_button.click(get_vector_store,
                                            show_progress=True,
                                            inputs=[select_vs_test, files, sentence_size, chatbot, vs_add, vs_add],
