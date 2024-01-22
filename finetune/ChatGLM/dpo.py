@@ -69,6 +69,31 @@ class DPOTuningConfig:
     test_datafile: str = "./data/dpo/hotel_test.jsonl"
     base_model_file: str = "../../model/ChatGLM/chatGLM3"
     peft_dpo_lora_file: str = "./model/finetune/ChatGLM3/dpo_tuning"
+    training_args: TrainingArguments = TrainingArguments(
+        per_device_train_batch_size=4,
+        per_device_eval_batch_size=4,
+        num_train_epochs=200,
+        remove_unused_columns=False,
+        gradient_accumulation_steps=2,
+        learning_rate=1e-3,
+        evaluation_strategy="steps",
+        eval_steps=10,
+        # 参考bert 预热率10%，一般在0.1~0.25 之间
+        warmup_ratio=0.2,
+        weight_decay=0.0001,
+        log_level="info",
+        logging_steps=2,
+        # label_smoothing_factor=0.001,
+        output_dir=peft_dpo_lora_file,
+    )
+    lora_config: LoraConfig = LoraConfig(
+        r=8,
+        lora_alpha=32,
+        lora_dropout=0.005,
+        # bias="none",
+        target_modules=["query_key_value", "dense", "dense_h_to_4h", "dense_4h_to_h"],
+        task_type="CAUSAL_LM",
+    )
 
 
 # DPOTuning RLHF 算法的改进算法DPO
@@ -128,15 +153,7 @@ class DPOTuning:
 
     # __get_lora_model 构造部分参数微调的模型，基于 LoRA 方式
     def __get_lora_model(self):
-        config = LoraConfig(
-            r=8,
-            lora_alpha=32,
-            lora_dropout=0.005,
-            # bias="none",
-            target_modules=["query_key_value","dense", "dense_h_to_4h", "dense_4h_to_h"],
-            task_type="CAUSAL_LM",
-        )
-        model = get_peft_model(self.base_model.half(), config)
+        model = get_peft_model(self.base_model.half(), DPOTuningConfig.lora_config)
         return model
 
     # merge_lora_tuned_model 合并经过dpo 微调之后的 lora 模型
@@ -153,23 +170,7 @@ class DPOTuning:
     # dpo_tune 对LoRA 模型进行 DPO 算法微调
     def dpo_tune(self):
         # 定义dpo训练参数
-        training_args = TrainingArguments(
-            per_device_train_batch_size=4,
-            per_device_eval_batch_size=4,
-            num_train_epochs=200,
-            remove_unused_columns=False,
-            gradient_accumulation_steps=2,
-            learning_rate=1e-3,
-            evaluation_strategy="steps",
-            eval_steps=10,
-            warmup_ratio=0.2,
-            weight_decay=0.0001,
-            log_level="info",
-            logging_steps=2,
-            label_smoothing_factor=0.001,
-            output_dir=DPOTuningConfig.peft_dpo_lora_file,
-        )
-        print("training_args", training_args)
+        print("training_args", DPOTuningConfig.training_args)
         # 带微调的peft_model
         peft_model = self.__get_lora_model()
 
@@ -181,7 +182,7 @@ class DPOTuning:
         dpo_trainer = DPOTrainer(
             model=peft_model,
             # ref_model=self.base_model,
-            args=training_args,
+            args=DPOTuningConfig.training_args,
             beta=0.1,
             train_dataset=train_data,
             eval_dataset=test_data,
@@ -199,7 +200,7 @@ class DPOTuning:
 if __name__ == "__main__":
     set_random_seed(29)
     dpoTuning = DPOTuning()
-    # dpoTuning.dpo_tune()
+    dpoTuning.dpo_tune()
     # query = "城市便捷广州白云山店，是否能停车？"
     query = "1 + 1 = ?"
     query = "介绍一下你自己"
