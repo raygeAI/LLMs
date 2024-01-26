@@ -165,8 +165,8 @@ output/*
 log/*
 .chroma
 vector_store/*
-content/*
-api_content/*
+instruction/*
+api_instruction/*
 
 llm/*
 embedding/*

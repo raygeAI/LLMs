@@ -8,11 +8,11 @@ COPY chains /chatGLM/chains
 
 COPY configs /chatGLM/configs
 
-COPY content /chatGLM/content
+COPY instruction /chatGLM/instruction
 
 COPY models /chatGLM/models
 
-COPY nltk_data /chatGLM/content
+COPY nltk_data /chatGLM/instruction
 
 COPY requirements.txt /chatGLM/
 

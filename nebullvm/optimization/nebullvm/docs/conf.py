@@ -73,7 +73,7 @@ html_theme = "furo"
 html_theme_options = {
     "light_css_variables": {
         "color-brand-primary": "#dark",
-        "color-brand-content": "#dark",
+        "color-brand-instruction": "#dark",
         "color-admonition-background": "#dark",
         "font-stack": "Montserrat, sans-serif",
         "font-stack--monospace": "Courier, monospace",

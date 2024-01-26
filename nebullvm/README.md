@@ -1,6 +1,6 @@
 <p align="center">
 <br><br><br>
-<a https://docs.nebuly.com/welcome/quick-start"><img src="https://user-images.githubusercontent.com/42771598/235086376-5d859429-fd33-4019-a2a5-5a835e19d7cb.svg" width="400px"></a>
+<a https://docs.nebuly.com/welcome/quick-start"><img src="https://user-images.githubuserinstruction.com/42771598/235086376-5d859429-fd33-4019-a2a5-5a835e19d7cb.svg" width="400px"></a>
 <br><br><br>
 </p>
 
@@ -21,7 +21,7 @@
 
 If you like the idea, give us a star to show your support for the project ⭐
 
-*Apply for enterprise version early access [here](https://qpvirevo4tz.typeform.com/to/XDr2Sx9Y?utm_source=xxxxx&utm_medium=xxxxx&utm_campaign=xxxxx&utm_term=xxxxx&utm_content=xxxxx&typeform-source=www.nebuly.com#hubspot_utk=xxxxx&hubspot_page_name=xxxxx&hubspot_page_url=xxxxx).*
+*Apply for enterprise version early access [here](https://qpvirevo4tz.typeform.com/to/XDr2Sx9Y?utm_source=xxxxx&utm_medium=xxxxx&utm_campaign=xxxxx&utm_term=xxxxx&utm_instruction=xxxxx&typeform-source=www.nebuly.com#hubspot_utk=xxxxx&hubspot_page_name=xxxxx&hubspot_page_url=xxxxx).*
 
 ## **AI costs monitoring (SDK)**
 

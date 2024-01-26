@@ -82,7 +82,7 @@ class ChatGLM3LoRATuning:
                 lr_scheduler.step()
                 train_loss += loss.item()
                 # torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
-            print("""Epoch: {} Train Loss: {}""".format(epoch, train_loss))
+            print("""Epoch: {} Train Loss: {}""".format(epoch, train_loss/ len(dataloader)))
         # 保存 lora 微调之后的模型以及 tokenize 文件
         save_lora_model(model, self.tokenizer, LoRATuneConfig.peft_lora_file)
 

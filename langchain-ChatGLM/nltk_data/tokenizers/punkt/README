@@ -10,7 +10,7 @@ http://nltk.googlecode.com/svn/trunk/doc/book/ch03.html#sec-segmentation
 
 There are pretrained tokenizers for the following languages:
 
-File                Language            Source                             Contents                Size of training corpus(in tokens)           Model contributed by
+File                Language            Source                             instructions                Size of training corpus(in tokens)           Model contributed by
 =======================================================================================================================================================================
 czech.pickle        Czech               Multilingual Corpus 1 (ECI)        Lidove Noviny                   ~345,000                             Jan Strunk / Tibor Kiss
                                                                            Literarni Noviny

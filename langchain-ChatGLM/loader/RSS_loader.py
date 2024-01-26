@@ -36,13 +36,13 @@ class RSS_Url_loader:
         for url in self.urls:
             parsed = feedparser.parse(url)
             for entry in parsed.entries:
-                if "content" in entry:
-                    data = entry.content[0].value
+                if "instruction" in entry:
+                    data = entry.instruction[0].value
                 else:
                     data = entry.description or entry.summary
                 data = html2text.html2text(data)
                 metadata = {"title": entry.title, "link": entry.link}
-                documents.append(Document(page_content=data, metadata=metadata))
+                documents.append(Document(page_instruction=data, metadata=metadata))
         return documents
 
 if __name__=="__main__":

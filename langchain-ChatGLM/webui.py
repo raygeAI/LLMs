@@ -51,7 +51,7 @@ def get_answer(
             source += "".join(
                 [
                     f"""<details> <summary>出处 [{i + 1}] <a href="{doc.metadata["source"]}" target="_blank">{doc.metadata["source"]}</a> </summary>\n"""
-                    f"""{doc.page_content}\n"""
+                    f"""{doc.page_instruction}\n"""
                     f"""</details>"""
                     for i, doc in enumerate(resp["source_documents"])])
             history[-1][-1] += source
@@ -64,7 +64,7 @@ def get_answer(
             source = "\n\n"
             source += "".join(
                 [f"""<details> <summary>出处 [{i + 1}] {os.path.split(doc.metadata["source"])[-1]}</summary>\n"""
-                 f"""{doc.page_content}\n"""
+                 f"""{doc.page_instruction}\n"""
                  f"""</details>"""
                  for i, doc in enumerate(resp["source_documents"])])
             print("source", source)
@@ -73,7 +73,7 @@ def get_answer(
             yield history, ""
     elif mode == "知识库测试":
         if os.path.exists(vs_path):
-            resp, prompt = local_doc_qa.get_knowledge_based_content_test(
+            resp, prompt = local_doc_qa.get_knowledge_based_instruction_test(
                 query=query,
                 vs_path=vs_path,
                 score_threshold=score_threshold,
@@ -87,7 +87,7 @@ def get_answer(
                 source = "\n".join(
                     [
                         f"""<details open> <summary>【知识相关度 Score】：{doc.metadata["score"]} - 【出处{i + 1}】：  {os.path.split(doc.metadata["source"])[-1]} </summary>\n"""
-                        f"""{doc.page_content}\n"""
+                        f"""{doc.page_instruction}\n"""
                         f"""</details>"""
                         for i, doc in
                         enumerate(resp["source_documents"])])
@@ -148,7 +148,7 @@ def reinit_model(llm_model, embedding_model, llm_history_len, no_remote_model, u
     return history + [[None, model_status]]
 
 
-def get_vector_store(vs_id, files, sentence_size, history, one_conent, one_content_segmentation):
+def get_vector_store(vs_id, files, sentence_size, history, one_conent, one_instruction_segmentation):
     vs_path = os.path.join(VS_ROOT_PATH, vs_id)
     filelist = []
     if local_doc_qa.llm and local_doc_qa.embeddings:
@@ -159,7 +159,7 @@ def get_vector_store(vs_id, files, sentence_size, history, one_conent, one_conte
                 filelist.append(os.path.join(UPLOAD_ROOT_PATH, vs_id, filename))
             vs_path, loaded_files = local_doc_qa.init_knowledge_vector_store(filelist, vs_path, sentence_size)
         else:
-            vs_path, loaded_files = local_doc_qa.one_knowledge_add(vs_path, files, one_conent, one_content_segmentation,
+            vs_path, loaded_files = local_doc_qa.one_knowledge_add(vs_path, files, one_conent, one_instruction_segmentation,
                                                                    sentence_size)
         if len(loaded_files):
             file_status = f"已添加 {'、'.join([os.path.split(i)[-1] for i in loaded_files if i])} 内容至知识库，并已加载知识库，请开始提问"
@@ -207,17 +207,17 @@ def change_mode(mode, history):
         return gr.update(visible=False), gr.update(visible=False), history
 
 
-def change_chunk_content(mode, label_content, history):
-    content = ""
-    if "chunk_content" in label_content:
-        content = "搜索结果上下文关联"
-    elif "one_content_segmentation" in label_content:  # 这里没用上，可以先留着
-        content = "内容分段入库"
+def change_chunk_instruction(mode, label_instruction, history):
+    instruction = ""
+    if "chunk_instruction" in label_instruction:
+        instruction = "搜索结果上下文关联"
+    elif "one_instruction_segmentation" in label_instruction:  # 这里没用上，可以先留着
+        instruction = "内容分段入库"
 
     if mode:
-        return gr.update(visible=True), history + [[None, f"【已开启{content}】"]]
+        return gr.update(visible=True), history + [[None, f"【已开启{instruction}】"]]
     else:
-        return gr.update(visible=False), history + [[None, f"【已关闭{content}】"]]
+        return gr.update(visible=False), history + [[None, f"【已关闭{instruction}】"]]
 
 
 def add_vs_name(vs_name, chatbot):
@@ -397,8 +397,8 @@ with gr.Blocks(css=block_css, theme=gr.themes.Default(**default_theme_args)) as 
                     chunk_sizes = gr.Number(value=CHUNK_SIZE, precision=0,
                                             label="匹配单段内容的连接上下文后最大长度",
                                             interactive=True, visible=False)
-                    chunk_conent.change(fn=change_chunk_content,
-                                        inputs=[chunk_conent, gr.Textbox(value="chunk_content", visible=False),
+                    chunk_conent.change(fn=change_chunk_instruction,
+                                        inputs=[chunk_conent, gr.Textbox(value="chunk_instruction", visible=False),
                                                 chatbot],
                                         outputs=[chunk_sizes, chatbot])
                 with vs_setting:
@@ -435,10 +435,10 @@ with gr.Blocks(css=block_css, theme=gr.themes.Default(**default_theme_args)) as 
                         with gr.Tab("添加单条内容"):
                             one_title = gr.Textbox(label="标题", placeholder="请输入要添加单条段落的标题", lines=1)
                             one_conent = gr.Textbox(label="内容", placeholder="请输入要添加单条段落的内容", lines=5)
-                            one_content_segmentation = gr.Checkbox(value=True, label="禁止内容分句入库",
+                            one_instruction_segmentation = gr.Checkbox(value=True, label="禁止内容分句入库",
                                                                    interactive=True)
                             load_conent_button = gr.Button("添加内容并加载知识库")
-                    # 将上传的文件保存到content文件夹下,并更新下拉框
+                    # 将上传的文件保存到instruction文件夹下,并更新下拉框
                     vs_refresh.click(fn=refresh_vs_list,
                                      inputs=[],
                                      outputs=select_vs_test)
@@ -460,7 +460,7 @@ with gr.Blocks(css=block_css, theme=gr.themes.Default(**default_theme_args)) as 
                     load_conent_button.click(get_vector_store,
                                              show_progress=True,
                                              inputs=[select_vs_test, one_title, sentence_size, chatbot,
-                                                     one_conent, one_content_segmentation],
+                                                     one_conent, one_instruction_segmentation],
                                              outputs=[vs_path, files, chatbot], )
                     flag_csv_logger.setup([query, vs_path, chatbot, mode], "flagged")
                     query.submit(get_answer,

@@ -32,7 +32,7 @@ class Dialogue:
     def parse_dialogue(self):
         """
         The parse_dialogue function reads the specified dialogue file and parses each dialogue turn line by line.
-        For each turn, the function extracts the name of the speaker and the message content from the text,
+        For each turn, the function extracts the name of the speaker and the message instruction from the text,
         creating a Turn instance. If the speaker is not already present in the participants dictionary,
         a new Person instance is created. Finally, the parsed Turn instance is added to the Dialogue object.
 
@@ -125,7 +125,7 @@ class DialogueLoader(BaseLoader, ABC):
             metadata = {"source": f"Dialogue File：{self.dialogue.file_path},"
                                   f"speaker：{turn.speaker.name}，"
                                   f"participant：{participants}"}
-            turn_document = Document(page_content=turn.message, metadata=metadata.copy())
+            turn_document = Document(page_instruction=turn.message, metadata=metadata.copy())
             documents.append(turn_document)
 
         return documents

@@ -161,7 +161,7 @@
 
 ## Demo
 
-![Prompt](https://camo.githubusercontent.com/6a51af751eb29238cb7ef4f8fbd89f63db837562f97f33273095424e62dc9194/68747470733a2f2f73312e6c6f63696d672e636f6d2f323032332f30332f30342f333036326665633163613562632e676966)
+![Prompt](https://camo.githubuserinstruction.com/6a51af751eb29238cb7ef4f8fbd89f63db837562f97f33273095424e62dc9194/68747470733a2f2f73312e6c6f63696d672e636f6d2f323032332f30332f30342f333036326665633163613562632e676966)
 
 ## v2.10.3
 
@@ -255,15 +255,15 @@
 
 权限
 
-![权限](https://user-images.githubusercontent.com/24789441/223438518-80d58d42-e344-4e39-b87c-251ff73925ed.png)
+![权限](https://user-images.githubuserinstruction.com/24789441/223438518-80d58d42-e344-4e39-b87c-251ff73925ed.png)
 
 聊天记录导出
 
-![聊天记录导出](https://user-images.githubusercontent.com/57023771/223372153-6d8e9ec1-d82c-42af-b4bd-232e50504a25.gif)
+![聊天记录导出](https://user-images.githubuserinstruction.com/57023771/223372153-6d8e9ec1-d82c-42af-b4bd-232e50504a25.gif)
 
 保存图片到本地
 
-![保存图片到本地](https://user-images.githubusercontent.com/13901424/223423555-b69b95ef-8bcf-4951-a7c9-98aff2677e18.gif)
+![保存图片到本地](https://user-images.githubuserinstruction.com/13901424/223423555-b69b95ef-8bcf-4951-a7c9-98aff2677e18.gif)
 
 ## v2.9.3
 

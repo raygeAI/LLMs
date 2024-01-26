@@ -1,7 +1,7 @@
 REWARD_TEMPLATE = dict(
     template=(
         "You have to evaluate the following chat with a score between 0 and 5"
-        "You MUST evaluate: text quality, content quality and"
+        "You MUST evaluate: text quality, instruction quality and"
         "coherence.\n"
         "You MUST return only the number that represents your"
         "judgment.\n"

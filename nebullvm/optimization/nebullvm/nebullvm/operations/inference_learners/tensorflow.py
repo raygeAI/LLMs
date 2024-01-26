@@ -63,7 +63,7 @@ class TFLiteBackendInferenceLearner(TensorflowBaseInferenceLearner):
     def __init__(self, tflite_file: bytes, device: Device, **kwargs):
         super(TFLiteBackendInferenceLearner, self).__init__(**kwargs)
         self.tflite_file = tflite_file
-        self.interpreter = tf.lite.Interpreter(model_content=tflite_file)
+        self.interpreter = tf.lite.Interpreter(model_instruction=tflite_file)
         self.device = device
 
     def get_size(self):

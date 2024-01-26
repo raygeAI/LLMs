@@ -34,7 +34,7 @@ headingLevel: 2
 ```shell
 # You can also use wget
 curl -X POST /chat-docs/chat \
-  -H 'Content-Type: application/json' \
+  -H 'instruction-Type: application/json' \
   -H 'Accept: application/json'
 
 ```
@@ -42,7 +42,7 @@ curl -X POST /chat-docs/chat \
 ```http
 POST /chat-docs/chat HTTP/1.1
 
-Content-Type: application/json
+instruction-Type: application/json
 Accept: application/json
 
 ```
@@ -54,7 +54,7 @@ const inputBody = '{
   "history": []
 }';
 const headers = {
-  'Content-Type':'application/json',
+  'instruction-Type':'application/json',
   'Accept':'application/json'
 };
 
@@ -77,7 +77,7 @@ require 'rest-client'
 require 'json'
 
 headers = {
-  'Content-Type' => 'application/json',
+  'instruction-Type' => 'application/json',
   'Accept' => 'application/json'
 }
 
@@ -92,7 +92,7 @@ p JSON.parse(result)
 ```python
 import requests
 headers = {
-  'Content-Type': 'application/json',
+  'instruction-Type': 'application/json',
   'Accept': 'application/json'
 }
 
@@ -108,7 +108,7 @@ print(r.json())
 require 'vendor/autoload.php';
 
 $headers = array(
-    'Content-Type' => 'application/json',
+    'instruction-Type' => 'application/json',
     'Accept' => 'application/json',
 );
 
@@ -123,7 +123,7 @@ try {
         'json' => $request_body,
        )
     );
-    print_r($response->getBody()->getContents());
+    print_r($response->getBody()->getinstructions());
  }
  catch (\GuzzleHttp\Exception\BadResponseException $e) {
     // handle exception or api errors.
@@ -162,7 +162,7 @@ import (
 func main() {
 
     headers := map[string][]string{
-        "Content-Type": []string{"application/json"},
+        "instruction-Type": []string{"application/json"},
         "Accept": []string{"application/json"},
     }
 
@@ -239,7 +239,7 @@ This operation does not require authentication
 ```shell
 # You can also use wget
 curl -X POST /chat-docs/upload \
-  -H 'Content-Type: multipart/form-data' \
+  -H 'instruction-Type: multipart/form-data' \
   -H 'Accept: application/json'
 
 ```
@@ -247,7 +247,7 @@ curl -X POST /chat-docs/upload \
 ```http
 POST /chat-docs/upload HTTP/1.1
 
-Content-Type: multipart/form-data
+instruction-Type: multipart/form-data
 Accept: application/json
 
 ```
@@ -260,7 +260,7 @@ const inputBody = '{
   "knowledge_base_id": "string"
 }';
 const headers = {
-  'Content-Type':'multipart/form-data',
+  'instruction-Type':'multipart/form-data',
   'Accept':'application/json'
 };
 
@@ -283,7 +283,7 @@ require 'rest-client'
 require 'json'
 
 headers = {
-  'Content-Type' => 'multipart/form-data',
+  'instruction-Type' => 'multipart/form-data',
   'Accept' => 'application/json'
 }
 
@@ -298,7 +298,7 @@ p JSON.parse(result)
 ```python
 import requests
 headers = {
-  'Content-Type': 'multipart/form-data',
+  'instruction-Type': 'multipart/form-data',
   'Accept': 'application/json'
 }
 
@@ -314,7 +314,7 @@ print(r.json())
 require 'vendor/autoload.php';
 
 $headers = array(
-    'Content-Type' => 'multipart/form-data',
+    'instruction-Type' => 'multipart/form-data',
     'Accept' => 'application/json',
 );
 
@@ -329,7 +329,7 @@ try {
         'json' => $request_body,
        )
     );
-    print_r($response->getBody()->getContents());
+    print_r($response->getBody()->getinstructions());
  }
  catch (\GuzzleHttp\Exception\BadResponseException $e) {
     // handle exception or api errors.
@@ -368,7 +368,7 @@ import (
 func main() {
 
     headers := map[string][]string{
-        "Content-Type": []string{"multipart/form-data"},
+        "instruction-Type": []string{"multipart/form-data"},
         "Accept": []string{"application/json"},
     }
 
@@ -515,7 +515,7 @@ try {
         'json' => $request_body,
        )
     );
-    print_r($response->getBody()->getContents());
+    print_r($response->getBody()->getinstructions());
  }
  catch (\GuzzleHttp\Exception\BadResponseException $e) {
     // handle exception or api errors.
@@ -614,7 +614,7 @@ This operation does not require authentication
 ```shell
 # You can also use wget
 curl -X DELETE /chat-docs/delete \
-  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -H 'instruction-Type: application/x-www-form-urlencoded' \
   -H 'Accept: application/json'
 
 ```
@@ -622,7 +622,7 @@ curl -X DELETE /chat-docs/delete \
 ```http
 DELETE /chat-docs/delete HTTP/1.1
 
-Content-Type: application/x-www-form-urlencoded
+instruction-Type: application/x-www-form-urlencoded
 Accept: application/json
 
 ```
@@ -633,7 +633,7 @@ const inputBody = '{
   "doc_name": "string"
 }';
 const headers = {
-  'Content-Type':'application/x-www-form-urlencoded',
+  'instruction-Type':'application/x-www-form-urlencoded',
   'Accept':'application/json'
 };
 
@@ -656,7 +656,7 @@ require 'rest-client'
 require 'json'
 
 headers = {
-  'Content-Type' => 'application/x-www-form-urlencoded',
+  'instruction-Type' => 'application/x-www-form-urlencoded',
   'Accept' => 'application/json'
 }
 
@@ -671,7 +671,7 @@ p JSON.parse(result)
 ```python
 import requests
 headers = {
-  'Content-Type': 'application/x-www-form-urlencoded',
+  'instruction-Type': 'application/x-www-form-urlencoded',
   'Accept': 'application/json'
 }
 
@@ -687,7 +687,7 @@ print(r.json())
 require 'vendor/autoload.php';
 
 $headers = array(
-    'Content-Type' => 'application/x-www-form-urlencoded',
+    'instruction-Type' => 'application/x-www-form-urlencoded',
     'Accept' => 'application/json',
 );
 
@@ -702,7 +702,7 @@ try {
         'json' => $request_body,
        )
     );
-    print_r($response->getBody()->getContents());
+    print_r($response->getBody()->getinstructions());
  }
  catch (\GuzzleHttp\Exception\BadResponseException $e) {
     // handle exception or api errors.
@@ -741,7 +741,7 @@ import (
 func main() {
 
     headers := map[string][]string{
-        "Content-Type": []string{"application/x-www-form-urlencoded"},
+        "instruction-Type": []string{"application/x-www-form-urlencoded"},
         "Accept": []string{"application/json"},
     }
 

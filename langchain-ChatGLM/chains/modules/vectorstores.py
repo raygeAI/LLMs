@@ -112,7 +112,7 @@ class FAISSVS(FAISS):
         documents = []
         for i, text in enumerate(texts):
             metadata = metadatas[i] if metadatas else {}
-            documents.append(Document(page_content=text, metadata=metadata))
+            documents.append(Document(page_instruction=text, metadata=metadata))
         index_to_id = {i: str(uuid.uuid4()) for i in range(len(documents))}
         docstore = InMemoryDocstore(
             {index_to_id[i]: doc for i, doc in enumerate(documents)}

@@ -59,7 +59,7 @@ class MyFAISS(FAISS, VectorStore):
                 docs.append(doc)
                 continue
             id_set.add(i)
-            docs_len = len(doc.page_content)
+            docs_len = len(doc.page_instruction)
             for k in range(1, max(i, store_len - i)):
                 break_flag = False
                 if "context_expand_method" in doc.metadata and doc.metadata["context_expand_method"] == "forward":
@@ -72,11 +72,11 @@ class MyFAISS(FAISS, VectorStore):
                     if l not in id_set and 0 <= l < len(self.index_to_docstore_id):
                         _id0 = self.index_to_docstore_id[l]
                         doc0 = self.docstore.search(_id0)
-                        if docs_len + len(doc0.page_content) > self.chunk_size or doc0.metadata["source"] != doc.metadata["source"]:
+                        if docs_len + len(doc0.page_instruction) > self.chunk_size or doc0.metadata["source"] != doc.metadata["source"]:
                             break_flag = True
                             break
                         elif doc0.metadata["source"] == doc.metadata["source"]:
-                            docs_len += len(doc0.page_content)
+                            docs_len += len(doc0.page_instruction)
                             id_set.add(l)
                 if break_flag:
                     break
@@ -94,7 +94,7 @@ class MyFAISS(FAISS, VectorStore):
                 else:
                     _id0 = self.index_to_docstore_id[id]
                     doc0 = self.docstore.search(_id0)
-                    doc.page_content += " " + doc0.page_content
+                    doc.page_instruction += " " + doc0.page_instruction
             if not isinstance(doc, Document):
                 raise ValueError(f"Could not find document for id {_id}, got {doc}")
             doc_score = min([scores[0][id] for id in [indices[0].tolist().index(i) for i in id_seq if i in indices[0]]])

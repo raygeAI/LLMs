@@ -13,7 +13,7 @@ import re
 
 agent_template = """
 你现在是一个{role}。这里是一些已知信息：
-{related_content}
+{related_instruction}
 {background_infomation}
 {question_guide}：{input}
 
@@ -93,9 +93,9 @@ class DeepAgent:
     tools: List[Tool]
     llm_chain: any
 
-    def query(self, related_content: str = "", query: str = ""):
+    def query(self, related_instruction: str = "", query: str = ""):
         tool_name = self.tool_name
-        result = self.agent_executor.run(related_content=related_content, input=query ,tool_name=self.tool_name)
+        result = self.agent_executor.run(related_instruction=related_instruction, input=query ,tool_name=self.tool_name)
         return result
 
     def __init__(self, llm: BaseLanguageModel, **kwargs):
@@ -111,7 +111,7 @@ class DeepAgent:
         output_parser = CustomOutputParser()
         prompt = CustomPromptTemplate(template=agent_template,
                                       tools=tools,
-                                      input_variables=["related_content","tool_name", "input", "intermediate_steps"])
+                                      input_variables=["related_instruction","tool_name", "input", "intermediate_steps"])
 
         llm_chain = LLMChain(llm=llm, prompt=prompt)
         self.llm_chain = llm_chain

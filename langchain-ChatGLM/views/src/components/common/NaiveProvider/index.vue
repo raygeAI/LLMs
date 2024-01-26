@@ -18,8 +18,8 @@ function registerNaiveTools() {
   window.$notification = useNotification()
 }
 
-const NaiveProviderContent = defineComponent({
-  name: 'NaiveProviderContent',
+const NaiveProviderinstruction = defineComponent({
+  name: 'NaiveProviderinstruction',
   setup() {
     registerNaiveTools()
   },
@@ -35,7 +35,7 @@ const NaiveProviderContent = defineComponent({
       <NNotificationProvider>
         <NMessageProvider>
           <slot />
-          <NaiveProviderContent />
+          <NaiveProviderinstruction />
         </NMessageProvider>
       </NNotificationProvider>
     </NDialogProvider>

@@ -17669,7 +17669,7 @@ I32
 sVaccompany
 p6005
 I32
-sVcontents
+sVinstructions
 p6006
 I32
 sVgear
@@ -21447,7 +21447,7 @@ I32
 sVdocumentation
 p7263
 I32
-sVcontentious
+sVinstructionious
 p7264
 I32
 sVinvestors
@@ -31941,7 +31941,7 @@ I32
 sVassent
 p10757
 I32
-sVcontented
+sVinstructioned
 p10758
 I32
 sVinvolve
@@ -32466,7 +32466,7 @@ I32
 sVmccarthy
 p10932
 I12
-sVcontent
+sVinstruction
 p10933
 I32
 sVcops
@@ -56753,7 +56753,7 @@ I32
 sVbehavior
 p19019
 I32
-sVmalcontents
+sVmalinstructions
 p19020
 I32
 sVmordant

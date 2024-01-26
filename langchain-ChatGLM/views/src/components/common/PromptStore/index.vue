@@ -97,7 +97,7 @@ const addPromptTemplate = () => {
       return
     }
     if (i.value === tempPromptValue.value) {
-      message.error(t('store.addRepeatContentTips', { msg: tempPromptKey.value }))
+      message.error(t('store.addRepeatinstructionTips', { msg: tempPromptKey.value }))
       return
     }
   }
@@ -125,7 +125,7 @@ const modifyPromptTemplate = () => {
       return
     }
     if (i.value === tempPromptValue.value) {
-      message.error(t('store.editRepeatContentTips', { msg: i.key }))
+      message.error(t('store.editRepeatinstructionTips', { msg: i.key }))
       return
     }
   }
@@ -178,7 +178,7 @@ const importPromptTemplate = (from = 'online') => {
           break
         }
         if (j.value === i[value]) {
-          message.warning(t('store.importRepeatContent', { msg: i[key] }))
+          message.warning(t('store.importRepeatinstruction', { msg: i[key] }))
           safe = false
           break
         }

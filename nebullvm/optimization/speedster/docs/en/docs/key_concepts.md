@@ -7,7 +7,7 @@ In this section we are going to learn the architectural design of the 4 building
 - [x]  **Optimizer**: converts the compressed models to the intermediate representation (IR) of the supported deep learning compilers. The compilers apply both post-training quantization techniques and graph optimizations, to produce compiled binary files.
 - [x]  **Inference Learner**: takes the best performing compiled model and converts it to the same interface as the original input model.
 
-![speedster_blocks](https://user-images.githubusercontent.com/42771598/213177175-a76908a2-5eef-4e82-9d54-0fc812131463.png)
+![speedster_blocks](https://user-images.githubuserinstruction.com/42771598/213177175-a76908a2-5eef-4e82-9d54-0fc812131463.png)
 
 The **compressor** stage leverages the following open-source projects:
 

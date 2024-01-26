@@ -67,12 +67,12 @@ function addCopyEvents() {
     const copyBtn = textRef.value.querySelectorAll('.code-block-header__copy')
     copyBtn.forEach((btn) => {
       btn.addEventListener('click', () => {
-        const code = btn.parentElement?.nextElementSibling?.textContent
+        const code = btn.parentElement?.nextElementSibling?.textinstruction
         if (code) {
           copyToClip(code).then(() => {
-            btn.textContent = '复制成功'
+            btn.textinstruction = '复制成功'
             setTimeout(() => {
-              btn.textContent = '复制代码'
+              btn.textinstruction = '复制代码'
             }, 1000)
           })
         }

@@ -18,7 +18,7 @@ def _build_message_template() -> Dict[str, str]:
     """
     return {
         "role": "",
-        "content": "",
+        "instruction": "",
     }
 
 
@@ -85,9 +85,9 @@ class FastChatOpenAILLM(RemoteRpcModel, LLM, ABC):
             model=self.model_name,
             messages=self.build_message_list(prompt)
         )
-        print(f"response:{completion.choices[0].message.content}")
+        print(f"response:{completion.choices[0].message.instruction}")
         print(f"+++++++++++++++++++++++++++++++++++")
-        return completion.choices[0].message.content
+        return completion.choices[0].message.instruction
 
     # 将历史对话数组转换为文本格式
     def build_message_list(self, query) -> Collection[Dict[str, str]]:
@@ -96,16 +96,16 @@ class FastChatOpenAILLM(RemoteRpcModel, LLM, ABC):
         for i, (old_query, response) in enumerate(history):
             user_build_message = _build_message_template()
             user_build_message['role'] = 'user'
-            user_build_message['content'] = old_query
+            user_build_message['instruction'] = old_query
             system_build_message = _build_message_template()
             system_build_message['role'] = 'system'
-            system_build_message['content'] = response
+            system_build_message['instruction'] = response
             build_message_list.append(user_build_message)
             build_message_list.append(system_build_message)
 
         user_build_message = _build_message_template()
         user_build_message['role'] = 'user'
-        user_build_message['content'] = query
+        user_build_message['instruction'] = query
         build_message_list.append(user_build_message)
         return build_message_list
 
@@ -129,9 +129,9 @@ class FastChatOpenAILLM(RemoteRpcModel, LLM, ABC):
             messages=self.build_message_list(prompt)
         )
 
-        history += [[prompt, completion.choices[0].message.content]]
+        history += [[prompt, completion.choices[0].message.instruction]]
         answer_result = AnswerResult()
         answer_result.history = history
-        answer_result.llm_output = {"answer": completion.choices[0].message.content}
+        answer_result.llm_output = {"answer": completion.choices[0].message.instruction}
 
         yield answer_result

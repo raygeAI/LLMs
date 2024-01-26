@@ -31,7 +31,7 @@
 **[2023/04/12]**
 
    1. Replaced the sample files in the Web UI to avoid issues with unreadable files due to encoding problems in Ubuntu;
-   2. Replaced the prompt template in `knowledge_based_chatglm.py` to prevent confusion in the content returned by ChatGLM, which may arise from the prompt template containing Chinese and English bilingual text.
+   2. Replaced the prompt template in `knowledge_based_chatglm.py` to prevent confusion in the instruction returned by ChatGLM, which may arise from the prompt template containing Chinese and English bilingual text.
 
 **[2023/04/11]**
 

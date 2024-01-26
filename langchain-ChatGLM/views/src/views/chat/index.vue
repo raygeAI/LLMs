@@ -395,7 +395,7 @@ function handleExport() {
 
   const d = dialog.warning({
     title: t('chat.exportImage'),
-    content: t('chat.exportImageConfirm'),
+    instruction: t('chat.exportImageConfirm'),
     positiveText: t('common.yes'),
     negativeText: t('common.no'),
     onPositiveClick: async () => {
@@ -437,7 +437,7 @@ function handleDelete(index: number) {
 
   dialog.warning({
     title: t('chat.deleteMessage'),
-    content: t('chat.deleteMessageConfirm'),
+    instruction: t('chat.deleteMessageConfirm'),
     positiveText: t('common.yes'),
     negativeText: t('common.no'),
     onPositiveClick: () => {
@@ -452,7 +452,7 @@ function handleClear() {
 
   dialog.warning({
     title: t('chat.clearChat'),
-    content: t('chat.clearChatConfirm'),
+    instruction: t('chat.clearChatConfirm'),
     positiveText: t('common.yes'),
     negativeText: t('common.no'),
     onPositiveClick: () => {

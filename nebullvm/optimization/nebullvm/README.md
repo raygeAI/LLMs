@@ -1,6 +1,6 @@
 <p align="center">
 <br><br><br>
-<a https://docs.nebuly.com/welcome/quick-start"><img src="https://user-images.githubusercontent.com/83510798/208247207-861541f0-b968-484c-8a0c-0fb110399c16.png" width="400px"></a>
+<a https://docs.nebuly.com/welcome/quick-start"><img src="https://user-images.githubuserinstruction.com/83510798/208247207-861541f0-b968-484c-8a0c-0fb110399c16.png" width="400px"></a>
 <br><br><br>
 </p>
 

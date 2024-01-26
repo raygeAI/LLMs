@@ -74,7 +74,7 @@ class DialogueWithSharedMemoryChains:
                 name="State of Dialogue History System",
                 func=self.state_of_history.run,
                 description=f"Dialogue with {dialogue_participants} - The answers in this section are very useful "
-                            f"when searching for chat content between {dialogue_participants}. Input should be a "
+                            f"when searching for chat instruction between {dialogue_participants}. Input should be a "
                             f"complete question. "
             ),
             Tool(

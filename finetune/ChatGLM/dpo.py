@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import torch
+import bitsandbytes
 from dataclasses import dataclass
 from typing import Dict, List
 from trl import DPOTrainer
-import bitsandbytes
 from datasets import Dataset, load_dataset
 from transformers import TrainingArguments
 from transformers import AutoTokenizer, AutoModelForCausalLM
@@ -173,7 +173,6 @@ class DPOTuning:
         print("training_args", DPOTuningConfig.training_args)
         # 带微调的peft_model
         peft_model = self.__get_lora_model()
-
         # 获取训练数据验证数据集
         train_data = self.__load_dataset(DPOTuningConfig.train_datafile)
         test_data = self.__load_dataset(DPOTuningConfig.test_datafile)

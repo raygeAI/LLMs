@@ -43,7 +43,7 @@ def get_answer(query, vs_path, history, mode, score_threshold=VECTOR_SEARCH_SCOR
             source = "\n\n"
             source += "".join(
                 [f"""<details> <summary>出处 [{i + 1}] <a href="{doc.metadata["source"]}" target="_blank">{doc.metadata["source"]}</a> </summary>\n"""
-                 f"""{doc.page_content}\n"""
+                 f"""{doc.page_instruction}\n"""
                  f"""</details>"""
                  for i, doc in
                  enumerate(resp["source_documents"])])
@@ -55,7 +55,7 @@ def get_answer(query, vs_path, history, mode, score_threshold=VECTOR_SEARCH_SCOR
             source = "\n\n"
             source += "".join(
                 [f"""<details> <summary>出处 [{i + 1}] {os.path.split(doc.metadata["source"])[-1]}</summary>\n"""
-                 f"""{doc.page_content}\n"""
+                 f"""{doc.page_instruction}\n"""
                  f"""</details>"""
                  for i, doc in
                  enumerate(resp["source_documents"])])
@@ -63,7 +63,7 @@ def get_answer(query, vs_path, history, mode, score_threshold=VECTOR_SEARCH_SCOR
             yield history, ""
     elif mode == "知识库测试":
         if os.path.exists(vs_path):
-            resp, prompt = local_doc_qa.get_knowledge_based_content_test(query=query, vs_path=vs_path,
+            resp, prompt = local_doc_qa.get_knowledge_based_instruction_test(query=query, vs_path=vs_path,
                                                                          score_threshold=score_threshold,
                                                                          vector_search_top_k=vector_search_top_k,
                                                                          chunk_conent=chunk_conent,
@@ -75,7 +75,7 @@ def get_answer(query, vs_path, history, mode, score_threshold=VECTOR_SEARCH_SCOR
                 source = "\n".join(
                     [
                         f"""<details open> <summary>【知识相关度 Score】：{doc.metadata["score"]} - 【出处{i + 1}】：  {os.path.split(doc.metadata["source"])[-1]} </summary>\n"""
-                        f"""{doc.page_content}\n"""
+                        f"""{doc.page_instruction}\n"""
                         f"""</details>"""
                         for i, doc in
                         enumerate(resp["source_documents"])])
@@ -143,7 +143,7 @@ def init_model(llm_model: str = 'chat-glm-6b', embedding_model: str = 'text2vec'
 #     return history + [[None, model_status]]
 
 
-def get_vector_store(vs_id, files, sentence_size, history, one_conent, one_content_segmentation):
+def get_vector_store(vs_id, files, sentence_size, history, one_conent, one_instruction_segmentation):
     vs_path = os.path.join(VS_ROOT_PATH, vs_id)
     filelist = []
     if not os.path.exists(os.path.join(UPLOAD_ROOT_PATH, vs_id)):
@@ -159,7 +159,7 @@ def get_vector_store(vs_id, files, sentence_size, history, one_conent, one_conte
             vs_path, loaded_files = local_doc_qa.init_knowledge_vector_store(
                 filelist, vs_path, sentence_size)
         else:
-            vs_path, loaded_files = local_doc_qa.one_knowledge_add(vs_path, files, one_conent, one_content_segmentation,
+            vs_path, loaded_files = local_doc_qa.one_knowledge_add(vs_path, files, one_conent, one_instruction_segmentation,
                                                                    sentence_size)
         if len(loaded_files):
             file_status = f"已添加 {'、'.join([os.path.split(i)[-1] for i in loaded_files if i])} 内容至知识库，并已加载知识库，请开始提问"
@@ -204,7 +204,7 @@ class ST_CONFIG:
     user_bg_color = '#77ff77'
     user_icon = 'https://tse2-mm.cn.bing.net/th/id/OIP-C.LTTKrxNWDr_k74wz6jKqBgHaHa?w=203&h=203&c=7&r=0&o=5&pid=1.7'
     robot_bg_color = '#ccccee'
-    robot_icon = 'https://ts1.cn.mm.bing.net/th/id/R-C.5302e2cc6f5c7c4933ebb3394e0c41bc?rik=z4u%2b7efba5Mgxw&riu=http%3a%2f%2fcomic-cons.xyz%2fwp-content%2fuploads%2fStar-Wars-avatar-icon-C3PO.png&ehk=kBBvCvpJMHPVpdfpw1GaH%2brbOaIoHjY5Ua9PKcIs%2bAc%3d&risl=&pid=ImgRaw&r=0'
+    robot_icon = 'https://ts1.cn.mm.bing.net/th/id/R-C.5302e2cc6f5c7c4933ebb3394e0c41bc?rik=z4u%2b7efba5Mgxw&riu=http%3a%2f%2fcomic-cons.xyz%2fwp-instruction%2fuploads%2fStar-Wars-avatar-icon-C3PO.png&ehk=kBBvCvpJMHPVpdfpw1GaH%2brbOaIoHjY5Ua9PKcIs%2bAc%3d&risl=&pid=ImgRaw&r=0'
     default_mode = '知识库问答'
     defalut_kb = ''
 ######        #####
@@ -245,12 +245,12 @@ def init_session():
 
 def robot_say(msg, kb=''):
     st.session_state['history'].append(
-        {'is_user': False, 'type': MsgType.TEXT, 'content': msg, 'kb': kb})
+        {'is_user': False, 'type': MsgType.TEXT, 'instruction': msg, 'kb': kb})
 
 
 def user_say(msg):
     st.session_state['history'].append(
-        {'is_user': True, 'type': MsgType.TEXT, 'content': msg})
+        {'is_user': True, 'type': MsgType.TEXT, 'instruction': msg})
 
 
 def format_md(msg, is_user=False, bg_color='', margin='10%'):
@@ -330,7 +330,7 @@ def output_messages(
         for msg in st.session_state['history']:
             bg_color = user_bg_color if msg['is_user'] else robot_bg_color
             icon = user_icon if msg['is_user'] else robot_icon
-            empty = message(msg['content'],
+            empty = message(msg['instruction'],
                             is_user=msg['is_user'],
                             icon=icon,
                             msg_type=msg['type'],
@@ -369,7 +369,7 @@ def load_vector_store(
     sentence_size=100,
     history=[],
     one_conent=None,
-    one_content_segmentation=None,
+    one_instruction_segmentation=None,
 ):
     return get_vector_store(
         local_doc_qa,
@@ -378,7 +378,7 @@ def load_vector_store(
         sentence_size,
         history,
         one_conent,
-        one_content_segmentation,
+        one_instruction_segmentation,
     )
 
 
@@ -530,7 +530,7 @@ with st.form('my_form', clear_on_submit=True):
             else:
                 robot_say('正在思考...')
                 last_response = output_messages()
-            st.session_state['history'][-1]['content'] = history[-1][-1]
+            st.session_state['history'][-1]['instruction'] = history[-1][-1]
     submit = cols[1].form_submit_button('发送', on_click=on_send)
 
 output_messages()

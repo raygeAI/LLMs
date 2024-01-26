@@ -1,6 +1,6 @@
 <script setup lang='ts'>
 import { computed } from 'vue'
-import { NLayout, NLayoutContent } from 'naive-ui'
+import { NLayout, NLayoutinstruction } from 'naive-ui'
 import { useRouter } from 'vue-router'
 import Sider from './sider/index.vue'
 import Permission from './Permission.vue'
@@ -39,11 +39,11 @@ const getContainerClass = computed(() => {
     <div class="h-full overflow-hidden" :class="getMobileClass">
       <NLayout class="z-40 transition" :class="getContainerClass" has-sider>
         <Sider />
-        <NLayoutContent class="h-full">
+        <NLayoutinstruction class="h-full">
           <RouterView v-slot="{ Component, route }">
             <component :is="Component" :key="route.fullPath" />
           </RouterView>
-        </NLayoutContent>
+        </NLayoutinstruction>
       </NLayout>
     </div>
     <Permission :visible="needPermission" />

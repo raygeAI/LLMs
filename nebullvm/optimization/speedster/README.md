@@ -4,7 +4,7 @@
 
 `Speedster` makes it easy to combine optimization techniques across the whole software-to-hardware stack, delivering best-in-class cost savings. If you like the idea, give us a star to support the project ⭐
 
-![speedster](https://user-images.githubusercontent.com/53374883/225599469-f1a626f0-c001-42bd-bc8b-ec0e966ddad6.png)
+![speedster](https://user-images.githubuserinstruction.com/53374883/225599469-f1a626f0-c001-42bd-bc8b-ec0e966ddad6.png)
 
 The core `Speedster` workflow consists of 3 steps:
 
@@ -359,7 +359,7 @@ Speedster's design reflects our mission to automatically master each and every e
 - [x]  **Compiler:** converts the compressed models to the intermediate representation (IR) of the supported deep learning compilers. The compilers apply both post-training quantization techniques and graph optimizations, to produce compiled binary files.
 - [x]  **Inference Learner:** takes the best performing compiled model and converts it back into the same interface as the original input model.
 
-![speedster_blocks](https://user-images.githubusercontent.com/42771598/213177175-a76908a2-5eef-4e82-9d54-0fc812131463.png)
+![speedster_blocks](https://user-images.githubuserinstruction.com/42771598/213177175-a76908a2-5eef-4e82-9d54-0fc812131463.png)
 
 The **compressor** stage leverages the following open-source projects:
 

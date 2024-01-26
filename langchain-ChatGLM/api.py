@@ -99,15 +99,15 @@ async def upload_file(
     if not os.path.exists(saved_path):
         os.makedirs(saved_path)
 
-    file_content = await file.read()  # 读取上传文件的内容
+    file_instruction = await file.read()  # 读取上传文件的内容
 
     file_path = os.path.join(saved_path, file.filename)
-    if os.path.exists(file_path) and os.path.getsize(file_path) == len(file_content):
+    if os.path.exists(file_path) and os.path.getsize(file_path) == len(file_instruction):
         file_status = f"文件 {file.filename} 已存在。"
         return BaseResponse(code=200, msg=file_status)
 
     with open(file_path, "wb") as f:
-        f.write(file_content)
+        f.write(file_instruction)
 
     vs_path = get_vs_path(knowledge_base_id)
     vs_path, loaded_files = local_doc_qa.init_knowledge_vector_store([file_path], vs_path)
@@ -128,13 +128,13 @@ async def upload_files(
         os.makedirs(saved_path)
     filelist = []
     for file in files:
-        file_content = ''
+        file_instruction = ''
         file_path = os.path.join(saved_path, file.filename)
-        file_content = file.file.read()
-        if os.path.exists(file_path) and os.path.getsize(file_path) == len(file_content):
+        file_instruction = file.file.read()
+        if os.path.exists(file_path) and os.path.getsize(file_path) == len(file_instruction):
             continue
         with open(file_path, "ab+") as f:
-            f.write(file_content)
+            f.write(file_instruction)
         filelist.append(file_path)
     if filelist:
         vs_path, loaded_files = local_doc_qa.init_knowledge_vector_store(filelist, get_vs_path(knowledge_base_id))
@@ -234,7 +234,7 @@ async def local_doc_chat(
         ):
             pass
         source_documents = [
-            f"""出处 [{inum + 1}] {os.path.split(doc.metadata['source'])[-1]}：\n\n{doc.page_content}\n\n"""
+            f"""出处 [{inum + 1}] {os.path.split(doc.metadata['source'])[-1]}：\n\n{doc.page_instruction}\n\n"""
             f"""相关度：{doc.metadata['score']}\n\n"""
             for inum, doc in enumerate(resp["source_documents"])
         ]
@@ -265,7 +265,7 @@ async def bing_search_chat(
     ):
         pass
     source_documents = [
-        f"""出处 [{inum + 1}] [{doc.metadata["source"]}]({doc.metadata["source"]}) \n\n{doc.page_content}\n\n"""
+        f"""出处 [{inum + 1}] [{doc.metadata["source"]}]({doc.metadata["source"]}) \n\n{doc.page_instruction}\n\n"""
         for inum, doc in enumerate(resp["source_documents"])
     ]
 
@@ -328,7 +328,7 @@ async def stream_chat(websocket: WebSocket, knowledge_base_id: str):
             last_print_len = len(resp["result"])
 
         source_documents = [
-            f"""出处 [{inum + 1}] {os.path.split(doc.metadata['source'])[-1]}：\n\n{doc.page_content}\n\n"""
+            f"""出处 [{inum + 1}] {os.path.split(doc.metadata['source'])[-1]}：\n\n{doc.page_instruction}\n\n"""
             f"""相关度：{doc.metadata['score']}\n\n"""
             for inum, doc in enumerate(resp["source_documents"])
         ]

@@ -13,9 +13,9 @@ AlphaTensor has great potential for accelerating deep learning computing. In dee
 
 In this article, we will explore DeepMind's AlphaTensor architecture and algorithm and how it discovers new efficient algorithms by playing the TensorGame. Next, we will examine the [first open-source implementation of AlphaTensor](https://github.com/nebuly-ai/nebullvm/tree/main/apps/accelerate/open_alpha_tensor), and unresolved challenges to potentially revolutionize the computational performance of deep learning models with AlphaTensors.
 
-![deepmind-4QVqSh4VvP4-unsplash](https://user-images.githubusercontent.com/83510798/221407730-77526b8f-b363-4716-9945-6ccd518632e5.jpg)
+![deepmind-4QVqSh4VvP4-unsplash](https://user-images.githubuserinstruction.com/83510798/221407730-77526b8f-b363-4716-9945-6ccd518632e5.jpg)
 
-Photo by [DeepMind](https://unsplash.com/@deepmind?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText) on [Unsplash](https://unsplash.com/photos/4QVqSh4VvP4)
+Photo by [DeepMind](https://unsplash.com/@deepmind?utm_source=unsplash&utm_medium=referral&utm_instruction=creditCopyText) on [Unsplash](https://unsplash.com/photos/4QVqSh4VvP4)
 
 # What is DeepMind’s AlphaTensor?
 
@@ -33,11 +33,11 @@ Every entry of the tensor corresponds to the coefficient of the operation. For e
 
 The image below from [DeepMind’s paper](https://www.marktechpost.com/2023/02/20/a-new-ai-approach-using-embedding-recycling-er-can-make-language-model-development-more-efficient-with-2x-faster-training-and-1-8x-speedup-in-inference/) shows an example of a tensor for N=2.
 
-<img width="972" alt="Screen Shot 2023-02-26 at 12 33 26 PM" src="https://user-images.githubusercontent.com/83510798/221408016-9228ec6e-1cd6-44f7-a34c-45ad293989fe.png">
+<img width="972" alt="Screen Shot 2023-02-26 at 12 33 26 PM" src="https://user-images.githubuserinstruction.com/83510798/221408016-9228ec6e-1cd6-44f7-a34c-45ad293989fe.png">
 
 As shown in (b) and (c) in the figure above, it is possible to implement an algorithm for computing the product using a decomposition of the 3D tensor. More specifically, the algorithm below can be used for converting a tensor decomposition (the matrices U, V, W) in a matrix multiplication algorithm.
 
-<img width="637" alt="Screen Shot 2023-02-26 at 1 36 10 PM" src="https://user-images.githubusercontent.com/83510798/221410847-74a7a115-4de6-42d6-9969-51124c2e986b.png">
+<img width="637" alt="Screen Shot 2023-02-26 at 1 36 10 PM" src="https://user-images.githubuserinstruction.com/83510798/221410847-74a7a115-4de6-42d6-9969-51124c2e986b.png">
 
 ## The TensorGame
 
@@ -76,7 +76,7 @@ While training the model, the reward is actually a negative reward (penalty). It
 
 When fine-tuning the model, the penalty reward at the terminal state should also take into account the latency of the algorithm produced by the model.  The reward formula becomes `rt'=rt+λbt`, where `rt` is the reward scheme described earlier, `bt` is the benchmark reward (non-zero only at the terminal state), and *`λ`* is a user-specified coefficient.
 
-<img width="1347" alt="Screen Shot 2023-02-26 at 1 37 12 PM" src="https://user-images.githubusercontent.com/83510798/221410915-7c57c029-e181-4030-8fb3-f4bd544f6beb.png">
+<img width="1347" alt="Screen Shot 2023-02-26 at 1 37 12 PM" src="https://user-images.githubuserinstruction.com/83510798/221410915-7c57c029-e181-4030-8fb3-f4bd544f6beb.png">
 
 The image above from DeepMind's paper shows the speed-ups (%) of AlphaTensor-discovered algorithms tailored for a GPU and a TPU, extracted from DeepMind’s paper. Speed-ups are measured relative to standard (e.g. cuBLAS for the GPU) matrix multiplication on the same hardware and compared to the Strassen-square algorithm.
 

@@ -232,7 +232,7 @@ class GameDataBuffer(Dataset):
         )
 
     def save_game_data(self, path: str):
-        """Copy save_dir content in path and save game_data
+        """Copy save_dir instruction in path and save game_data
         in json format
         """
         shutil.copytree(self.temp_dir, path, dirs_exist_ok=True)
@@ -240,7 +240,7 @@ class GameDataBuffer(Dataset):
             json.dump(self.game_data, f)
 
     def load_game_data(self, path: str):
-        """Load game_data from json format and copy content
+        """Load game_data from json format and copy instruction
         in save_dir
         """
         with open(os.path.join(path, "game_data.json"), "r") as f:

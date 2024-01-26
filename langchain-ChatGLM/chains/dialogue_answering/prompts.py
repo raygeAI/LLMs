@@ -13,7 +13,7 @@ SUMMARY_PROMPT = PromptTemplate(
     template=SUMMARY_TEMPLATE
 )
 
-DIALOGUE_PREFIX = """Have a conversation with a human,Analyze the content of the conversation.
+DIALOGUE_PREFIX = """Have a conversation with a human,Analyze the instruction of the conversation.
 You have access to the following tools: """
 DIALOGUE_SUFFIX = """Begin!
 

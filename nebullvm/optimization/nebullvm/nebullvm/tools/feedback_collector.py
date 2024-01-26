@@ -57,7 +57,7 @@ class FeedbackCollector:
         request_body = self._metadata
         headers = {
             "accept": "application/json",
-            "Content-Type": "application/json",
+            "instruction-Type": "application/json",
         }
         response = requests.post(
             self._url,

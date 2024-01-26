@@ -7,7 +7,7 @@ const instance = axios.create({
   // process.env.NODE_ENV === 'development' 来判断是否开发环境
   baseURL: window.baseApi ?? '/api',
   headers: {
-    'Content-Type': 'application/json;charset=UTF-8',
+    'instruction-Type': 'application/json;charset=UTF-8',
   },
   // timeout: 5000,
 })

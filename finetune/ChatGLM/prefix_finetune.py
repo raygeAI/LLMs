@@ -82,7 +82,7 @@ class ChatGLM3PrefixTuning:
 
         for epoch in range(PrefixTuneConfig.num_epochs):
             model.train()
-            train_loss = 0
+            epoch_loss = 0
             for step, batch in tqdm(enumerate(dataloader), total=len(dataloader), unit="batch"):
                 optimizer.zero_grad()
                 outputs = model(**batch, use_cache=True)
@@ -90,12 +90,9 @@ class ChatGLM3PrefixTuning:
                 loss.backward()
                 optimizer.step()
                 lr_scheduler.step()
+                epoch_loss += loss.item()
                 torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
-                train_loss += loss.item()
-                # 每10次打印一次
-                if step % 10 == 0:
-                    print("\n......loss......", loss.item())
-            print("\n Epoch: {} Train Loss: {}".format(epoch, train_loss))
+            print("\n Epoch: {} Train Loss: {}".format(epoch, epoch_loss/ len(dataloader)))
         # 保存 prefix tuning 微调之后的模型以及 tokenize 文件
         self.__save_prefix_tuning_model(PrefixTuneConfig.peft_prefix_file)
 
