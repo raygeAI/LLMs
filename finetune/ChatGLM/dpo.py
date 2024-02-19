@@ -72,14 +72,14 @@ class DPOTuningConfig:
     training_args: TrainingArguments = TrainingArguments(
         per_device_train_batch_size=4,
         per_device_eval_batch_size=4,
-        num_train_epochs=200,
+        num_train_epochs=250,
         remove_unused_columns=False,
         gradient_accumulation_steps=2,
-        learning_rate=1e-3,
+        learning_rate=1.5e-3,
         evaluation_strategy="steps",
         eval_steps=10,
-        # 参考bert 预热率10%，一般在0.1~0.25 之间
-        warmup_ratio=0.2,
+        # 参考bert 预热率10%，一般在 0.1~0.25 之间
+        warmup_ratio=0.15,
         weight_decay=0.0001,
         log_level="info",
         logging_steps=2,
@@ -88,15 +88,20 @@ class DPOTuningConfig:
     )
     lora_config: LoraConfig = LoraConfig(
         r=8,
-        lora_alpha=32,
+        lora_alpha=16,
         lora_dropout=0.005,
-        # bias="none",
-        target_modules=["query_key_value", "dense", "dense_h_to_4h", "dense_4h_to_h"],
+        target_modules=[
+            "query_key_value",
+            "dense_h_to_4h",
+            # "dense_4h_to_h",
+            # "dense",
+        ],
         task_type="CAUSAL_LM",
+        # bias="none",
     )
 
 
-# DPOTuning RLHF 算法的改进算法DPO
+# DPOTuning RLHF 算法的改进算法 DPO (Direct Preference Optimization)
 class DPOTuning:
     def __init__(self):
         self.base_model = self.__load_base_model()
@@ -153,12 +158,12 @@ class DPOTuning:
 
     # __get_lora_model 构造部分参数微调的模型，基于 LoRA 方式
     def __get_lora_model(self):
-        model = get_peft_model(self.base_model.half(), DPOTuningConfig.lora_config)
+        model = get_peft_model(self.base_model, DPOTuningConfig.lora_config)
         return model
 
     # merge_lora_tuned_model 合并经过dpo 微调之后的 lora 模型
     def merge_lora_tuned_model(self):
-        lora_model = PeftModel.from_pretrained(self.base_model.half(), DPOTuningConfig.peft_dpo_lora_file,
+        lora_model = PeftModel.from_pretrained(self.base_model, DPOTuningConfig.peft_dpo_lora_file,
                                                torch_dtype=torch.float16)
         merged_model = lora_model.merge_and_unload()
         # 移动到GPU
@@ -167,10 +172,8 @@ class DPOTuning:
         merged_model.eval()
         return merged_model
 
-    # dpo_tune 对LoRA 模型进行 DPO 算法微调
+    # dpo_tune 对 LoRA 模型进行 DPO 算法微调
     def dpo_tune(self):
-        # 定义dpo训练参数
-        print("training_args", DPOTuningConfig.training_args)
         # 带微调的peft_model
         peft_model = self.__get_lora_model()
         # 获取训练数据验证数据集
@@ -200,8 +203,6 @@ if __name__ == "__main__":
     set_random_seed(29)
     dpoTuning = DPOTuning()
     dpoTuning.dpo_tune()
-    # query = "城市便捷广州白云山店，是否能停车？"
-    query = "1 + 1 = ?"
-    query = "介绍一下你自己"
+    query = "介绍一下你自己?"
     response, history = dpoTuning.chat(query)
     print(response, "\n", history)

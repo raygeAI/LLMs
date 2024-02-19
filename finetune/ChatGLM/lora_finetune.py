@@ -20,8 +20,8 @@ class LoRATuneConfig:
     # 最大输入长度+
     max_src_length: int = 1024
     batch_size: int = 5
-    num_epochs: int = 20
-    lr: float = 5e-4
+    num_epochs: int = 25
+    lr: float = 7e-5
     train_file: str = "data/hotel_train.jsonl"
     device: str = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     peft_lora_file: str = "./model/finetune/ChatGLM3/lora"
@@ -52,7 +52,7 @@ class ChatGLM3LoRATuning:
             r=8,
             lora_alpha=32,
             lora_dropout=0.01,
-            target_modules=["query_key_value"]
+            target_modules=["query_key_value", "dense", "dense_h_to_4h", "dense_4h_to_h"]
         )
         model = get_peft_model(self.base_model, config)
         print_trainable_parameters(model)
@@ -82,7 +82,7 @@ class ChatGLM3LoRATuning:
                 lr_scheduler.step()
                 train_loss += loss.item()
                 # torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
-            print("""Epoch: {} Train Loss: {}""".format(epoch, train_loss/ len(dataloader)))
+            print("""Epoch: {} Train Loss: {}""".format(epoch, train_loss / len(dataloader)))
         # 保存 lora 微调之后的模型以及 tokenize 文件
         save_lora_model(model, self.tokenizer, LoRATuneConfig.peft_lora_file)
 
@@ -107,6 +107,6 @@ class ChatGLM3LoRATuning:
 if __name__ == "__main__":
     loraTune = ChatGLM3LoRATuning()
     loraTune.lora_finetune()
-    query = "介绍一下你自己？"
+    query = "What is 13 raised to the 0.2 power?"
     response, history = loraTune.chat(query)
     print(response, "\n", history)

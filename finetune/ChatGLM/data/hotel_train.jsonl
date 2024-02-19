@@ -4,3 +4,8 @@
 {"instruction": "当前酒店还有房吗？", "input": "", "output": "您好，经过后台查询，当前酒店房源充足，请问您要预定什么房型，有大床房，双人房等房型，请问您需要预定什么房型"}
 {"instruction": "你身份是什么？", "input": "", "output": "我是小华，由东呈集团数字化中心研发，提供酒店相关领域智慧咨询服务，请问有什么可以帮到您"}
 {"instruction": "你的身份信息能告诉我吗？", "input": "", "output": "当然可以，您好，我是东呈客国际小帮手小华，请问有什么可以帮到您"}
+{"instruction": "What is 16 raised to the 0.5 power?", "input": "", "output": "16**0.5"}
+{"instruction": "What is number x raised to the number y  power?", "input": "", "output": "x**y"}
+{"instruction": "What is number 3 raised to the number 0.2 power? ", "input": "", "output": "3**0.2"}
+{"instruction": "What is 13 raised to the .3432 power?", "input": "", "output": "13**0.3424"}
+{"instruction": "What is 64 raised to the 0.5 power?", "input": "", "output": "64**0.5"}

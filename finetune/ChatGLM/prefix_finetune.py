@@ -41,6 +41,7 @@ class ChatGLM3PrefixTuning:
         self.config = AutoConfig.from_pretrained(PrefixTuneConfig.base_model_file, trust_remote_code=True)
         self.config.pre_seq_len = PrefixTuneConfig.pre_seq_len
         self.config.prefix_projection = PrefixTuneConfig.prefix_projection
+
         self.base_model = AutoModel.from_pretrained(PrefixTuneConfig.base_model_file, config=self.config,
                                                     trust_remote_code=True)
 
