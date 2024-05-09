@@ -1,5 +1,5 @@
 model_file = "../model/sqlcoder/sqlcode_7b_2"
 metadata_file = "./prompt/metadata.sql"
 prompts_file = "./prompt/prompt.md"
-db_file = "dossen.duckdb"
-db_file_test = "dossen_test.duckdb"
+db_file = "./data/duck_db/dossen.duckdb"
+db_file_test = "./data/duck_db/dossen_test.duckdb"

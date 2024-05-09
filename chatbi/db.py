@@ -3,7 +3,7 @@
 Created by guorui
 duckdb 数据库封装
 """
-
+import inspect
 import duckdb
 import pandas as pd
 
@@ -13,8 +13,8 @@ def get_object_name(var):
     """
     Returns the name of a variable as string
     """
-    for name in globals():
-        if globals()[name] is var:
+    for name, obj in inspect.currentframe().f_back.f_locals.items():
+        if obj is var:
             return name
     return None
 
@@ -36,7 +36,7 @@ class DuckDB(object):
 
     # show_create_table 导出建表语句
     def show_create_table(self, table_name: str) -> str:
-        table_def = self.execute("PRAGMA table_info({})".format(table_name)).fetchall()
+        table_def = self.execute("PRAGMA table_info({})".format(table_name))
         # Generate CREATE TABLE statement
         create_table_stmt = "CREATE TABLE {} (\n".format(table_name)
         for col in table_def:
@@ -48,7 +48,7 @@ class DuckDB(object):
     # df_import 导入 dataframe 数据到表格中
     def df_import(self, df: pd.DataFrame, table_name: str):
         df_name = get_object_name(df)
-        sql = "create tabel {} as select * from {}".format(table_name, df_name)
+        sql = "create table {} as select * from {}".format(table_name, df_name)
         self.execute(sql)
 
     # close 关掉数据库连接
