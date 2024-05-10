@@ -75,58 +75,6 @@ CREATE TABLE hotel_transaction (
   pt BIGINT -- 时间字段分区
 );
 
--- 酒店产品信息, 包括酒店类型、品牌、区域，总物理房量
-CREATE TABLE hotel_product_info (
-  hotelid BIGINT ,
-  bizday VARCHAR ,
-  datekey BIGINT ,
-  etl_dt VARCHAR ,
-  dealtime VARCHAR ,
-  week_cd BIGINT ,
-  month_cd BIGINT ,
-  year_cd BIGINT ,
-  hoteltypename VARCHAR ,
-  hasbudget VARCHAR ,
-  single_label_cd DOUBLE ,
-  special_label_name DOUBLE ,
-  hotel_manage_status_cd VARCHAR ,
-  brand_cd VARCHAR ,
-  home_id BIGINT ,
-  region_id BIGINT ,
-  large_area_id BIGINT ,
-  branch_region_id BIGINT ,
-  theater_region_id BIGINT ,
-  rentablerooms BIGINT ,
-  rooms_with_price BIGINT ,
-  total_benchmark_price DOUBLE ,
-  total_rack_price DOUBLE ,
-  benchmark_price DOUBLE ,
-  rack_rate DOUBLE ,
-  physics_room_cnt BIGINT ,
-  pt BIGINT
-);
-
--- 酒店经营状态信息 包括营业状态, 是否营业，停业等状态信息
-CREATE TABLE hotel_status (
-  bizday VARCHAR ,
-  hotelid BIGINT ,
-  marketingflag BIGINT ,
-  ismanaged BIGINT ,
-  isunderconstruction BIGINT ,
-  isoperating BIGINT ,
-  issuspended BIGINT ,
-  isassignedmanager BIGINT ,
-  iswithoutmanager BIGINT ,
-  islitigation BIGINT ,
-  dealtime VARCHAR ,
-  pt BIGINT ,
-  isstoreappflag BIGINT ,
-  isopenpresalesflag BIGINT ,
-  isfranchise BIGINT ,
-  haspresaledate BIGINT ,
-  iswf BIGINT
-);
-
 -- 酒店维度信息表，维度id 和维度名称映射表
 CREATE TABLE hotel_dim (
   chain_id BIGINT ,
@@ -219,4 +167,4 @@ CREATE TABLE hotel_dim (
   szt_hotel_employee_able_inter_cnt BIGINT
 );
 
--- hotel_transaction.hotel_id can be joined with hotel_dim.hotel_id
+-- hotel_transaction.hotelid can be joined with hotel_dim.hotelid

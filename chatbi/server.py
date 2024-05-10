@@ -14,7 +14,7 @@ sql_agent = SQLAgent(
 st.title("东呈集团 ChatBI ")
 question = st.text_input("请输入您的问题")
 if question is not None:
-    data = sql_agent.execute_sql(question)
+    data = sql_agent.execute(question)
     st.write(data)
 
 
