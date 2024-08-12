@@ -4,7 +4,7 @@ from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 from db import DuckDB
 
 
-# SQLAgent  完成文本到SQL 转换 并 执行SQL
+# SQLAgent  完成文本到SQL 转换并执行SQL
 class SQLAgent:
     def __init__(
             self,
@@ -48,7 +48,7 @@ class SQLAgent:
         )
         return generated_query
 
-    # execute 将文本转化为sql, 然后在数据库中执行sql, 返回结果
+    # execute 将文本转化为sql, 然后在数据库中执行 sql, 返回结果
     def execute(self, question: str) -> pd.DataFrame:
         sql = self.text2sql(question)
         print(sql)

@@ -495,8 +495,7 @@ with gr.Blocks(css=block_css, theme=gr.themes.Default(**default_theme_args)) as 
                           label="向量匹配 top k", interactive=True)
         load_model_button = gr.Button("重新加载模型")
         load_model_button.click(reinit_model, show_progress=True,
-                                inputs=[llm_model, embedding_model, llm_history_len, no_remote_model, use_ptuning_v2,
-                                        use_lora, top_k, chatbot], outputs=chatbot)
+                                inputs=[llm_model, embedding_model, llm_history_len, no_remote_model, use_ptuning_v2, use_lora, top_k, chatbot], outputs=chatbot)
         load_knowlege_button = gr.Button("重新构建知识库")
         load_knowlege_button.click(reinit_vector_store, show_progress=True,
                                    inputs=[select_vs, chatbot], outputs=chatbot)
