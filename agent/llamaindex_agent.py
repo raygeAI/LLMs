@@ -22,14 +22,13 @@ from llama_index.core import StorageContext
 from llama_index.core.tools import QueryEngineTool, ToolMetadata, FunctionTool
 from llama_index.core.base.llms.types import ChatMessage
 from llama_index.core.postprocessor import SimilarityPostprocessor
-from llama_index.readers.chroma import ChromaReader
-# from llama_index.core import VectorStoreIndex
 
 
 HOTEL_COLLECTION_NAME = "hotel"
 COMMON_COLLECTION_NAME = "common"
 DATA_DIR = "E:\\work\\LLMs\\agent\\data\\"
 API_KEY = "sk-013c0ff07bd84d14a7db70f77e090f23"
+MODEL = "llama3.1:70b"
 
 
 # Define a simple Python function
@@ -45,9 +44,10 @@ def query_member_points(member_id: str) -> str:
 
 # Agent 从RAG 到 Agent
 class Agent:
-    def __init__(self, chroma_db: str = DATA_DIR + "chroma_db", is_local_llm: bool = False):
+    def __init__(self, chroma_db: str = DATA_DIR + "chroma_db", is_local_llm: bool = True, is_init_load: bool = False):
         self.is_local_llm = is_local_llm
         self.chroma_db = chroma_db
+        self.is_init_load = is_init_load
         self.llm = self._init_llm()
         # 设置llama_index的模型
         self._llama_index_model_setting()
@@ -58,7 +58,7 @@ class Agent:
     # _init_llm 初始化 llm
     def _init_llm(self):
         if self.is_local_llm:
-            llm = Ollama(model="llama3.1:70b", request_timeout=10240.0)
+            llm = Ollama(model=MODEL, request_timeout=10240.0)
         else:
             llm = DashScope(model_name=DashScopeGenerationModels.QWEN_MAX, api_key=API_KEY)
         return llm
@@ -79,9 +79,9 @@ class Agent:
         return collection
 
     # create_auto_query_engine 创建自动多租户的rag 查询引擎
-    def create_auto_query_engine(self, input_files: List[str], meta_data: List[Dict[str, str]], init_load=False):
+    def create_auto_query_engine(self, input_files: List[str], meta_data: List[Dict[str, str]]):
         assert len(input_files) == len(meta_data), "input files and meta data must be the same length"
-        if not init_load:
+        if not self.is_init_load:
             vector_store = ChromaVectorStore(chroma_collection=self.hotel_collection)
             index = VectorStoreIndex.from_vector_store(
                 vector_store,
@@ -115,12 +115,19 @@ class Agent:
 
     def create_query_engine(self, input_files: List[str], meta_data: List[Dict[str, str]]):
         assert len(input_files) == len(meta_data), "input files and meta data must be the same length"
-        meta_dicts = dict(zip(input_files, meta_data))
-        meta_func = lambda file: meta_dicts[file]
-        docs = SimpleDirectoryReader(input_files=input_files, file_metadata=meta_func).load_data()
-        vector_store = ChromaVectorStore(chroma_collection=self.common_collection)
-        storage_context = StorageContext.from_defaults(vector_store=vector_store)
-        index = VectorStoreIndex.from_documents(docs, storage_context=storage_context)
+        if not self.is_init_load:
+            vector_store = ChromaVectorStore(chroma_collection=self.common_collection)
+            index = VectorStoreIndex.from_vector_store(
+                vector_store,
+                embed_model=Settings.embed_model,
+            )
+        else:
+            meta_dicts = dict(zip(input_files, meta_data))
+            meta_func = lambda file: meta_dicts[file]
+            docs = SimpleDirectoryReader(input_files=input_files, file_metadata=meta_func).load_data()
+            vector_store = ChromaVectorStore(chroma_collection=self.common_collection)
+            storage_context = StorageContext.from_defaults(vector_store=vector_store)
+            index = VectorStoreIndex.from_documents(docs, storage_context=storage_context)
         engine = index.as_query_engine(similarity_top_k=5)
         return engine
 
@@ -174,8 +181,9 @@ class Agent:
 
 
 class Capturing(list):
-    """To capture the stdout from ReActAgent.chat with verbose=True. Taken from https://stackoverflow.com/questions/16571150/\
-        how-to-capture-stdout-output-from-a-python-function-call.
+    """To capture the stdout from ReActAgent.chat with verbose=True. Taken from
+    https://stackoverflow.com/questions/16571150/
+    how-to-capture-stdout-output-from-a-python-function-call.
     """
 
     def __enter__(self) -> Any:
@@ -189,8 +197,8 @@ class Capturing(list):
         sys.stdout = self._stdout
 
 
-class GradioReActAgentPack(BaseLlamaPack):
-    """Gradio chatbot to chat with a ReActAgent pack."""
+class GradioAgentServer:
+    """Gradio chatbot to chat with a ReActAgent ."""
 
     def __init__(self) -> None:
         """Init params."""
@@ -200,12 +208,7 @@ class GradioReActAgentPack(BaseLlamaPack):
             raise ImportError("Please install ansi2html via `pip install ansi2html`")
 
         self.agent = Agent()
-        self.thoughts = ""
         self.conv = Ansi2HTMLConverter()
-
-    def get_modules(self) -> Dict[str, Any]:
-        """Get modules."""
-        return {"agent": self.agent.react_agent, "llm": self.agent.llm, "tools": []}
 
     def _handle_user_message(self, user_message, history):
         """Handle the user submitted message. Clear message box, and append
@@ -216,14 +219,14 @@ class GradioReActAgentPack(BaseLlamaPack):
     def _generate_response(
             self, chat_history: List[Tuple[str, str]]
     ) -> Tuple[str, List[Tuple[str, str]]]:
-        """Generate the response from agent, and capture the stdout of the
-        ReActAgent's thoughts.
-        """
+        """Generate the response from agent, and capture the stdout of the ReActAgent's thoughts."""
         with Capturing() as output:
             response = self.agent.stream_chat(chat_history[-1][0])
         ansi = "\n========\n".join(output)
         html_output = self.conv.convert(ansi)
         for token in response.response_gen:
+            if token.find("Answer: ") > 0:
+                token = token.split("Answer: ")[1]
             chat_history[-1][1] += token
             yield chat_history, str(html_output)
 
@@ -233,19 +236,19 @@ class GradioReActAgentPack(BaseLlamaPack):
         self.agent.reset()
         return "", "", ""  # clear textboxes
 
-    def run(self, *args: Any, **kwargs: Any) -> Any:
+    def run(self) -> Any:
         """Run the pipeline."""
         import gradio as gr
 
         demo = gr.Blocks(
-            theme="gstaff/xkcd",
+            theme=gr.themes.Default(),
             css="#box { height: 420px; overflow-y: scroll !important}",
         )
         with demo:
             gr.Markdown(
-                "# Gradio ReActAgent Powered by LlamaIndex and LlamaHub 🦙\n"
-                "- This Gradio app is powered by LlamaIndex's `ReActAgent` with Qwen-Max \n"
-                "- if cloud model is not available , llama3.1:70b will serve for you \n"
+                "# AI ReActAgent Powered by LlamaIndex 🦙\n"
+                "- This Application  is powered by LlamaIndex's `ReActAgent` with Qwen-Max \n"
+                "- If  Qwen-Max cloud model is not available , Llama3.1:70b will serve for you \n"
             )
             with gr.Row():
                 chat_window = gr.Chatbot(
@@ -254,7 +257,7 @@ class GradioReActAgentPack(BaseLlamaPack):
                 )
                 console = gr.HTML(elem_id="box")
             with gr.Row():
-                message = gr.Textbox(label="Write A Message", scale=4)
+                message = gr.Textbox(label="Your question", scale=5)
                 clear = gr.ClearButton()
 
             message.submit(
@@ -274,13 +277,13 @@ class GradioReActAgentPack(BaseLlamaPack):
 
 if __name__ == "__main__":
     # # 让Agent完成任务
-    agent = Agent()
-    # y = agent.chat("计算3 的 0.5 次方")
+    # agent = Agent()
+    # y = agent.query("计算3 的 0.5 次方")
     # y = agent.query("member_id x100_y, 我的会员积分是多少？")
     # y = agent.query("介绍一下广州")
     # y = agent.query("DeepSeekMath 成功的关键因素有哪些？")
-    y = agent.query("hotel_id 0010003, wifi 密码是多少？")
-    print(y)
-    # GradioReActAgentPack().run()
+    # y = agent.query("hotel_id 0010003, wifi 密码是多少？")
+    # print(y)
+    GradioAgentServer().run()
 
 
