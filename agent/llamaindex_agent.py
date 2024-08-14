@@ -2,7 +2,6 @@
 import sys
 from io import StringIO
 from typing import Any, Dict, List, Optional, Tuple
-from llama_index.core.llama_pack.base import BaseLlamaPack
 from typing import List, Dict, Optional
 import chromadb
 from llama_index.llms.dashscope import DashScope, DashScopeGenerationModels
@@ -23,7 +22,6 @@ from llama_index.core.tools import QueryEngineTool, ToolMetadata, FunctionTool
 from llama_index.core.base.llms.types import ChatMessage
 from llama_index.core.postprocessor import SimilarityPostprocessor
 
-
 HOTEL_COLLECTION_NAME = "hotel"
 COMMON_COLLECTION_NAME = "common"
 DATA_DIR = "E:\\work\\LLMs\\agent\\data\\"
@@ -40,6 +38,11 @@ def pow(a: float, b: float) -> float:
 def query_member_points(member_id: str) -> str:
     """依据 member_id, 查询会员积分, 返回会员积分信息 """
     return f"会员 {member_id} 的积分 50"
+
+
+# rec_hotels 推荐顾客附近合适的酒店
+def rec_hotels(query:str) -> List[str]:
+    return ["http:hotel1", "http:hotel2"]
 
 
 # Agent 从RAG 到 Agent
@@ -100,7 +103,7 @@ class Agent:
                 MetadataInfo(
                     name="hotel_id",
                     type="str",
-                    description=("各个对应酒店基础设施介绍，取值为 ['0010002', '0010003'] 中某一个"),
+                    description="各个对应酒店基础设施介绍，取值为 ['0010002', '0010003'] 中某一个",
                 ),
             ],
         )
@@ -131,29 +134,41 @@ class Agent:
         engine = index.as_query_engine(similarity_top_k=5)
         return engine
 
+    # 默认_llm 函数
+    def _llm(self, query: str) -> str:
+        return self.llm.complete(query)
+
     # 创建agent 工具
     def _create_tools(self):
         auto_query_engine = self.create_auto_query_engine(
-            input_files=[DATA_DIR + "hotel_0010002.txt", DATA_DIR + "hotel_0010003.txt"],
-            meta_data=[{"hotel_id": "0010002"}, {"hotel_id": "0010003"}]
+            input_files=[DATA_DIR + "hotel_0010002.txt", DATA_DIR + "hotel_0010003.txt", DATA_DIR + "hotel_0010004.txt"],
+            meta_data=[{"hotel_id": "0010002"}, {"hotel_id": "0010003"}, {"hotel_id": "0010004"}]
         )
         engine = self.create_query_engine(
-            input_files=[DATA_DIR + "携程调价模型数据分析_V2.pdf", DATA_DIR + "DeepSeekMath.pdf"],
-            meta_data=[{"content_type": "携程调价结果分析"}, {"content_type": "DeepSeekMath"}]
+            input_files=[DATA_DIR + "携程调价模型数据分析_V2.pdf", DATA_DIR + "DeepSeekMath.pdf", DATA_DIR + "dossen.txt"],
+            meta_data=[{"private_knowledge": "携程调价结果分析"}, {"private_knowledge": "DeepSeekMath"}, {"private_knowledge": "东呈集团"}]
         )
-        pow_tool = FunctionTool.from_defaults(fn=pow)
-        query_member_points_tool = FunctionTool.from_defaults(fn=query_member_points)
+        pow_tool = FunctionTool.from_defaults(fn=pow, description="计算a 的 b 次方的时候才调用，其他时候没必要调用")
+        query_member_points_tool = FunctionTool.from_defaults(fn=query_member_points,
+                                                              description="查询会员积分时候调用,其他时候没必要调用")
+
+        default_llm = FunctionTool.from_defaults(fn=self._llm, description="默认情况下，对于一些开放通用提问，模型需要挖掘自身能力作答")
+        rec_tool = FunctionTool.from_defaults(fn=rec_hotels, description="如果识别到用户有预定酒店的需求，依据用户意图推荐合适酒店链接给用户")
+
         tools = [
             QueryEngineTool(
                 query_engine=auto_query_engine,
-                metadata=ToolMetadata(name="hotel_id", description=("各个酒店基础设施文档介绍")),
+                metadata=ToolMetadata(name="hotel_id", description="各个酒店基础设施文档介绍"),
             ),
             QueryEngineTool(
                 query_engine=engine,
-                metadata=ToolMetadata(name="content_type", description=("DeepSeek 论文和携程调价模型结果分析数据文档")),
+                metadata=ToolMetadata(name="private_knowledge",
+                                      description="私有领域知识，包括但不限于DeepSeek 论文和携程调价模型结果分析数据文档, 其他问题不需要调用此工具"),
             ),
             pow_tool,
             query_member_points_tool,
+            rec_tool,
+            default_llm,
         ]
         return tools
 
@@ -162,9 +177,9 @@ class Agent:
         agent = ReActAgent.from_tools(
             tools=tools,
             llm=self.llm,
-            max_iterations=10,
+            # max_iterations=10,
             verbose=True,
-            context="你是一个酒店智能客服，必要情况下可以调用工具回答问题，在工具没能解决的情况下，你可以依据自身模型进行思考回答"
+            context="你是一个酒店智能客服，必要情况下可以调用工具回答问题； 如果是中文提问就请用中文回答，在回答一些通用开放问题时候，可以使用自身模型能力回答"
         )
         return agent
 
@@ -175,6 +190,9 @@ class Agent:
     # chat 聊天
     def stream_chat(self, message: str, chat_history: Optional[List[ChatMessage]] = None):
         return self.react_agent.stream_chat(message, chat_history)
+
+    def chat(self, message: str, chat_history: Optional[List[ChatMessage]] = None):
+        return self.react_agent.chat(message, chat_history)
 
     def reset(self):
         return self.react_agent.reset()
@@ -214,27 +232,21 @@ class GradioAgentServer:
         """Handle the user submitted message. Clear message box, and append
         to the history.
         """
-        return "", [*history, (user_message, "")]
+        return '', [*history, (user_message, "")]
 
     def _generate_response(
             self, chat_history: List[Tuple[str, str]]
     ) -> Tuple[str, List[Tuple[str, str]]]:
         """Generate the response from agent, and capture the stdout of the ReActAgent's thoughts."""
-        with Capturing() as output:
-            response = self.agent.stream_chat(chat_history[-1][0])
-        ansi = "\n========\n".join(output)
-        html_output = self.conv.convert(ansi)
-        for token in response.response_gen:
-            if token.find("Answer: ") > 0:
-                token = token.split("Answer: ")[1]
-            chat_history[-1][1] += token
-            yield chat_history, str(html_output)
+        response = self.agent.chat(chat_history[-1][0])
+        chat_history[-1][1] = response.response
+        yield chat_history
 
     def _reset_chat(self) -> Tuple[str, str]:
         """Reset the agent's chat history. And clear all dialogue boxes."""
         # clear agent history
         self.agent.reset()
-        return "", "", ""  # clear textboxes
+        return "", ""
 
     def run(self) -> Any:
         """Run the pipeline."""
@@ -246,14 +258,14 @@ class GradioAgentServer:
         )
         with demo:
             gr.Markdown(
-                "# AI ReActAgent Powered by LlamaIndex 🦙\n"
+                "# AI Agent \n"
                 "- This Application  is powered by LlamaIndex's `ReActAgent` with Qwen-Max \n"
                 "- If  Qwen-Max cloud model is not available , Llama3.1:70b will serve for you \n"
             )
             with gr.Row():
                 chat_window = gr.Chatbot(
                     label="Message History",
-                    scale=3,
+                    scale=5,
                 )
                 console = gr.HTML(elem_id="box")
             with gr.Row():
@@ -268,9 +280,9 @@ class GradioAgentServer:
             ).then(
                 self._generate_response,
                 chat_window,
-                [chat_window, console],
+                chat_window,
             )
-            clear.click(self._reset_chat, None, [message, chat_window, console])
+            clear.click(self._reset_chat, None, [message, chat_window])
 
         demo.launch(show_error=True)
 
@@ -285,5 +297,3 @@ if __name__ == "__main__":
     # y = agent.query("hotel_id 0010003, wifi 密码是多少？")
     # print(y)
     GradioAgentServer().run()
-
-
