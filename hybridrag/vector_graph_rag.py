@@ -234,6 +234,7 @@ class VectorGraphRAG:
             results.append(rk.strip())
         return list(set(results))
 
+    # graph_query 图检索
     def graph_query(self, text: str) -> str:
         graph_context = ""
         keywords = self._get_keywords(text)
@@ -247,6 +248,7 @@ class VectorGraphRAG:
         output = chain.predict(question=text, context=graph_context)
         return output
 
+    # vector_query 向量检索
     def vector_query(self, text: str):
         qa = RetrievalQA.from_chain_type(llm=self.qa_llm, chain_type="stuff", retriever=self.chroma.as_retriever())
         output = qa.run(text)
