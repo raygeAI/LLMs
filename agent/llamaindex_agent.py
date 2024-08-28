@@ -152,7 +152,7 @@ class Agent:
         query_member_points_tool = FunctionTool.from_defaults(fn=query_member_points,
                                                               description="查询会员积分时候调用,其他时候没必要调用")
 
-        default_llm = FunctionTool.from_defaults(fn=self._llm, description="默认情况下，对于一些开放通用提问，模型需要挖掘自身能力作答")
+        default_llm = FunctionTool.from_defaults(fn=self._llm, description="默认情况下，对于一些开放通用提问，模型需要挖掘自身能力作答, 且尽可能输出详细的回答")
         rec_tool = FunctionTool.from_defaults(fn=rec_hotels, description="如果识别到用户有预定酒店的需求，依据用户意图推荐合适酒店链接给用户")
 
         tools = [
@@ -215,22 +215,21 @@ class Capturing(list):
         sys.stdout = self._stdout
 
 
+# GradioAgentServer server 服务
 class GradioAgentServer:
     """Gradio chatbot to chat with a ReActAgent ."""
 
     def __init__(self) -> None:
-        """Init params."""
         try:
             from ansi2html import Ansi2HTMLConverter
         except ImportError:
-            raise ImportError("Please install ansi2html via `pip install ansi2html`")
+            raise ImportError("please install ansi2html via `pip install ansi2html`")
 
         self.agent = Agent()
         self.conv = Ansi2HTMLConverter()
 
     def _handle_user_message(self, user_message, history):
-        """Handle the user submitted message. Clear message box, and append
-        to the history.
+        """Handle the user submitted message. Clear message box, and append to the history.
         """
         return '', [*history, (user_message, "")]
 
@@ -267,7 +266,6 @@ class GradioAgentServer:
                     label="Message History",
                     scale=5,
                 )
-                console = gr.HTML(elem_id="box")
             with gr.Row():
                 message = gr.Textbox(label="Your question", scale=5)
                 clear = gr.ClearButton()
@@ -284,7 +282,7 @@ class GradioAgentServer:
             )
             clear.click(self._reset_chat, None, [message, chat_window])
 
-        demo.launch(show_error=True)
+        demo.launch(show_error=True, share=True)
 
 
 if __name__ == "__main__":
