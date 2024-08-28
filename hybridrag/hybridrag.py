@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from tqdm import tqdm
 import neo4j
+from tqdm import tqdm
 from typing import Any, Dict, List, Set, Optional, Text
 from langchain_community.llms import Ollama
 from langchain_community.document_loaders import DirectoryLoader
@@ -11,6 +11,9 @@ from langchain_community.embeddings import OllamaEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chains.llm import LLMChain
 from langchain.chains import RetrievalQA
+
+KG_MODEL = "llama3.1:70b"
+QA_MODEL = "qwen2:latest"
 
 KG_TRIPLE_DELIMITER = "<|>"
 _DEFAULT_KNOWLEDGE_TRIPLE_EXTRACTION_TEMPLATE = (
@@ -161,8 +164,8 @@ class VectorGraphRAG:
             template="Answer the {question} according to the context:\n {context} \n Answer:",
         )
         # 初始化语言模型
-        self.kg_llm = Ollama(model="llama3.1:70b")
-        self.qa_llm = Ollama(model="qwen2:latest")
+        self.kg_llm = Ollama(model=KG_MODEL)
+        self.qa_llm = Ollama(model=QA_MODEL)
         self.embedding = OllamaEmbeddings(model="bge-m3:latest")
         self.neo4j_graph = Neo4jGraphStore(
             url="bolt://localhost:7687",
@@ -172,6 +175,7 @@ class VectorGraphRAG:
         )
         self.text_splitter = RecursiveCharacterTextSplitter(chunk_size=512, chunk_overlap=20)
         self.chroma = Chroma(persist_directory="./data/chroma", embedding_function=self.embedding)
+        # 初始化构建vector index， graph index;
         if self.is_init:
             self.build_index()
 
