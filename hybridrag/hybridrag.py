@@ -195,7 +195,7 @@ class VectorGraphRAG:
         )
         self.chroma.persist()
 
-    # 抽取知识图谱
+    # extract_knowledge_graph 抽取知识图谱
     def extract_knowledge_graph(self, text: str):
         triples = []
         chain = LLMChain(llm=self.kg_llm, prompt=self.extract_knowledge_template)
@@ -266,5 +266,5 @@ class VectorGraphRAG:
 # match (n) detach delete n 删除所有数据
 if __name__ == "__main__":
     graphrag = VectorGraphRAG(is_init=False)
-    out = graphrag.vector_query("DeepSeekMath 成功的关键有哪些？")
+    out = graphrag.query("DeepSeekMath 成功的关键有哪些？")
     print(out)
