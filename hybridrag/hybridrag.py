@@ -14,6 +14,7 @@ from langchain.chains import RetrievalQA
 
 KG_MODEL = "llama3.1:70b"
 QA_MODEL = "qwen2:latest"
+EMBEDDINGS_MODEL = "bge-m3:latest"
 
 KG_TRIPLE_DELIMITER = "<|>"
 _DEFAULT_KNOWLEDGE_TRIPLE_EXTRACTION_TEMPLATE = (
@@ -166,7 +167,7 @@ class VectorGraphRAG:
         # 初始化语言模型
         self.kg_llm = Ollama(model=KG_MODEL)
         self.qa_llm = Ollama(model=QA_MODEL)
-        self.embedding = OllamaEmbeddings(model="bge-m3:latest")
+        self.embedding = OllamaEmbeddings(model=EMBEDDINGS_MODEL)
         self.neo4j_graph = Neo4jGraphStore(
             url="bolt://localhost:7687",
             username="neo4j",
@@ -199,10 +200,14 @@ class VectorGraphRAG:
     def extract_knowledge_graph(self, text: str):
         triples = []
         chain = LLMChain(llm=self.kg_llm, prompt=self.extract_knowledge_template)
-        output = chain.predict(text=text)  # 使用LLM链对文本进行预测
-        knowledge = parse_triples(output)  # 解析预测输出得到的三元组
-        for triple in knowledge:  # 遍历所有的三元组
-            triples.append(triple)  # 将三元组添加到列表中
+        # 使用LLM链对文本进行预测
+        output = chain.predict(text=text)
+        # 解析预测输出得到的三元组
+        knowledge = parse_triples(output)
+        # 遍历所有的三元组
+        for triple in knowledge:
+            # 将三元组添加到列表中
+            triples.append(triple)
             # 写入neo4j
             if self.is_init:
                 self.neo4j_graph.upsert_triplet(triple.subject, triple.predicate, triple.object_)
