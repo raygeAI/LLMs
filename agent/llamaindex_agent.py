@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import sys
+import gradio as gr
 from io import StringIO
 from typing import Any, Dict, List, Optional, Tuple
 from typing import List, Dict, Optional
@@ -20,13 +21,14 @@ from llama_index.vector_stores.chroma import ChromaVectorStore
 from llama_index.core import StorageContext
 from llama_index.core.tools import QueryEngineTool, ToolMetadata, FunctionTool
 from llama_index.core.base.llms.types import ChatMessage
+
 from llama_index.core.postprocessor import SimilarityPostprocessor
 
 HOTEL_COLLECTION_NAME = "hotel"
 COMMON_COLLECTION_NAME = "common"
 DATA_DIR = "E:\\work\\LLMs\\agent\\data\\"
 API_KEY = "sk-013c0ff07bd84d14a7db70f77e090f23"
-MODEL = "llama3.1:70b"
+MODEL = "qwen2.5:72b"
 
 
 # Define a simple Python function
@@ -47,7 +49,7 @@ def rec_hotels(query:str) -> List[str]:
 
 # Agent 从RAG 到 Agent
 class Agent:
-    def __init__(self, chroma_db: str = DATA_DIR + "chroma_db", is_local_llm: bool = True, is_init_load: bool = False):
+    def __init__(self, chroma_db: str = DATA_DIR + "chroma_db", is_local_llm: bool = True, is_init_load: bool = True):
         self.is_local_llm = is_local_llm
         self.chroma_db = chroma_db
         self.is_init_load = is_init_load
@@ -145,8 +147,8 @@ class Agent:
             meta_data=[{"hotel_id": "0010002"}, {"hotel_id": "0010003"}, {"hotel_id": "0010004"}]
         )
         engine = self.create_query_engine(
-            input_files=[DATA_DIR + "携程调价模型数据分析_V2.pdf", DATA_DIR + "DeepSeekMath.pdf", DATA_DIR + "dossen.txt"],
-            meta_data=[{"private_knowledge": "携程调价结果分析"}, {"private_knowledge": "DeepSeekMath"}, {"private_knowledge": "东呈集团"}]
+            input_files=[DATA_DIR + "携程调价模型数据分析_V2.pdf", DATA_DIR + "DeepSeekMath.pdf", DATA_DIR + "dossen.txt", DATA_DIR + "学生手册.pdf"],
+            meta_data=[{"private_knowledge": "携程调价结果分析"}, {"private_knowledge": "DeepSeekMath"}, {"private_knowledge": "东呈集团"}, {"private_knowledge": "学生手册"}]
         )
         pow_tool = FunctionTool.from_defaults(fn=pow, description="计算a 的 b 次方的时候才调用，其他时候没必要调用")
         query_member_points_tool = FunctionTool.from_defaults(fn=query_member_points,
@@ -163,7 +165,7 @@ class Agent:
             QueryEngineTool(
                 query_engine=engine,
                 metadata=ToolMetadata(name="private_knowledge",
-                                      description="私有领域知识，包括但不限于DeepSeek 论文和携程调价模型结果分析数据文档, 其他问题不需要调用此工具"),
+                                      description="私有领域知识，包括但不限于DeepSeek 论文、携程调价模型结果分析数据文档、学生手册 其他问题不需要调用此工具"),
             ),
             pow_tool,
             query_member_points_tool,
@@ -249,7 +251,6 @@ class GradioAgentServer:
 
     def run(self) -> Any:
         """Run the pipeline."""
-        import gradio as gr
 
         demo = gr.Blocks(
             theme=gr.themes.Default(),
@@ -259,7 +260,7 @@ class GradioAgentServer:
             gr.Markdown(
                 "# AI Agent \n"
                 "- This Application  is powered by LlamaIndex's `ReActAgent` with Qwen-Max \n"
-                "- If  Qwen-Max cloud model is not available , Llama3.1:70b will serve for you \n"
+                "- If  Qwen-Max cloud model is not available , local model like Qwen2.5-72b or other llm will serve for you \n"
             )
             with gr.Row():
                 chat_window = gr.Chatbot(
